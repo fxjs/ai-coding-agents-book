@@ -54,6 +54,52 @@ const FILE_ANCHOR = new Map(
 /** 解析相对链接时所在的源文件；由 parseMarkdown 设置 */
 let currentFile = '';
 
+// ---------------------------------------------------------------- 配套代码
+
+const EXAMPLES_DIR = path.join(ROOT, 'examples');
+const SKIP = new Set(['node_modules', '.git', '.agent-runs', '.worktrees', 'dist']);
+
+/** 递归收集 examples/ 下的普通文件（跳过软链与噪音目录） */
+function walkExamples(dir = EXAMPLES_DIR, rel = 'examples', out = []) {
+  if (!fs.existsSync(dir)) return out;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    if (SKIP.has(entry.name)) continue;
+    const abs = path.join(dir, entry.name);
+    const posix = `${rel}/${entry.name}`;
+    if (entry.isSymbolicLink()) continue;
+    if (entry.isDirectory()) walkExamples(abs, posix, out);
+    else if (entry.isFile()) out.push({ path: posix, size: fs.statSync(abs).size });
+  }
+  return out;
+}
+
+const EX_FILES = walkExamples();
+const EX_PATHS = new Set(EX_FILES.map((f) => f.path));
+
+/** 目录 -> 代表文件（优先 README.md，其次字典序第一个） */
+const EX_DIR_TARGET = new Map();
+for (const f of EX_FILES) {
+  const parts = f.path.split('/');
+  for (let i = 1; i < parts.length; i++) {
+    const dir = parts.slice(0, i).join('/');
+    const isReadme = /^README\.md$/i.test(parts[i] ?? '');
+    if (!EX_DIR_TARGET.has(dir) || isReadme) {
+      const candidate = isReadme ? f.path : EX_DIR_TARGET.get(dir) ?? f.path;
+      EX_DIR_TARGET.set(dir, candidate);
+    }
+  }
+}
+
+/** examples/... 代码片段 -> 代码查看器链接（不存在则返回 null） */
+function exampleLink(code) {
+  const p = code.trim().replace(/\/+$/, '');
+  if (!p.startsWith('examples')) return null;
+  if (p === 'examples') return 'examples.html';
+  if (EX_PATHS.has(p)) return 'examples.html?f=' + encodeURIComponent(p);
+  if (EX_DIR_TARGET.has(p)) return 'examples.html?f=' + encodeURIComponent(EX_DIR_TARGET.get(p));
+  return null;
+}
+
 // ---------------------------------------------------------------- 工具函数
 
 const esc = (s) =>
@@ -72,7 +118,11 @@ function slugify(text) {
 function inline(text) {
   const codeSpans = [];
   let out = text.replace(/`([^`]+)`/g, (_, code) => {
-    codeSpans.push(`<code>${esc(code)}</code>`);
+    const link = exampleLink(code);
+    const inner = `<code>${esc(code)}</code>`;
+    codeSpans.push(
+      link ? `<a class="code-link" href="${link}" title="在配套代码中打开">${inner}</a>` : inner,
+    );
     return `\u0000${codeSpans.length - 1}\u0000`;
   });
 
@@ -457,7 +507,25 @@ function main() {
     fs.cpSync(assets, path.join(OUT_DIR, 'assets'), { recursive: true });
   }
 
+  // 配套代码：复制到 dist/examples，并生成一个零依赖的代码查看器
+  if (EX_FILES.length) {
+    const exOut = path.join(OUT_DIR, 'examples');
+    fs.rmSync(exOut, { recursive: true, force: true });
+    for (const f of EX_FILES) {
+      const dst = path.join(OUT_DIR, f.path);
+      fs.mkdirSync(path.dirname(dst), { recursive: true });
+      fs.copyFileSync(path.join(ROOT, f.path), dst);
+    }
+
+    const viewerTemplate = fs.readFileSync(path.join(ROOT, 'build', 'examples-viewer.html'), 'utf8');
+    const viewerHtml = viewerTemplate
+      .replace('{{MANIFEST}}', JSON.stringify(EX_FILES).replace(/</g, '\\u003c'))
+      .replace('{{COUNT}}', String(EX_FILES.length));
+    fs.writeFileSync(path.join(OUT_DIR, 'examples.html'), viewerHtml);
+  }
+
   console.log(`构建完成：dist/index.html（${toc.length} 章，约 ${words} 词/字）`);
+  if (EX_FILES.length) console.log(`配套代码：dist/examples（${EX_FILES.length} 个文件）+ dist/examples.html`);
   console.log('合并版：dist/book.md');
 }
 

@@ -58,6 +58,7 @@
 - [x] T46b 搜索增强：`Ctrl/⌘+K`、`?q=` 分享链接、清空按钮、`file://` 兼容、标题命中带后文预览
 - [x] T46c 正文内全部命中高亮（CSS Custom Highlight API）+ `F3`/`Shift+F3` 逐处跳转 + n/m 计数
 - [x] T48 静态部署修复：`book/*.md` 相对链接在构建时改写为页内锚点；新增锚点校验、favicon、`npm run serve`
+- [x] T49 配套代码进 dist：复制 `examples/`、生成 `examples.html` 代码查看器（文件树/行号/复制/下载）、书中 `examples/…` 可点
 - [x] T47 术语统一：`agent` 不译（去掉「编码代理/多代理」等译法），标题用 Agent
 
 ## 验收记录（最后一次构建）

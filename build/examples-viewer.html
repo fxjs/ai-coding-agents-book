@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>配套代码 · AI Coding Agent 实战</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23b4532a'/%3E%3Ctext x='32' y='43' font-size='32' font-family='monospace' text-anchor='middle' fill='%23fff'%3EA%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #fbfaf7; --panel: #f4f1ea; --ink: #1f2328; --ink-soft: #5b6470;
+    --line: #e2ddd2; --accent: #b4532a; --accent-soft: #f3e4da; --code-bg: #f0ece3;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#161719; --panel:#1c1e21; --ink:#e6e3dc; --ink-soft:#9aa3ad; --line:#2c2f33;
+      --accent:#e08a5f; --accent-soft:#2a211c; --code-bg:#202327; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.7 var(--sans); }
+  .layout { display: flex; min-height: 100vh; }
+  aside { width: 320px; flex: 0 0 320px; height: 100vh; position: sticky; top: 0; overflow-y: auto;
+    background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+  .head { padding: 18px 18px 12px; border-bottom: 1px solid var(--line); }
+  .brand { font-weight: 700; font-size: 16px; }
+  .brand a { color: inherit; text-decoration: none; }
+  .sub { font-family: var(--mono); font-size: 11.5px; color: var(--accent); margin-top: 4px; }
+  .filter { width: 100%; margin-top: 12px; padding: 7px 9px; border: 1px solid var(--line);
+    border-radius: 6px; background: var(--bg); color: var(--ink); font: 13px var(--sans); }
+  .filter:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  nav { padding: 8px 6px 24px; font-size: 13px; }
+  details { margin: 1px 0; }
+  summary { cursor: pointer; padding: 4px 8px; border-radius: 4px; color: var(--ink-soft); font-family: var(--mono); }
+  summary:hover { background: var(--accent-soft); }
+  .file { display: block; padding: 3px 8px 3px 26px; border-radius: 4px; color: var(--ink);
+    text-decoration: none; font-family: var(--mono); font-size: 12.2px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; border-left: 2px solid transparent; }
+  .file:hover { background: var(--accent-soft); }
+  .file.active { border-left-color: var(--accent); background: var(--accent-soft); }
+  main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .bar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 12px;
+    padding: 10px 20px; background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line); font-size: 12.5px; color: var(--ink-soft); }
+  .bar .path { font-family: var(--mono); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar .spacer { flex: 1; }
+  .bar a, .bar button { font-size: 12.5px; color: var(--accent); text-decoration: none; border: 0; background: none;
+    cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+  .bar button:hover, .bar a:hover { background: var(--accent-soft); }
+  .viewer { flex: 1; overflow: auto; padding: 16px 20px 60px; }
+  .code { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
+  .line { display: flex; font: 12.8px/1.62 var(--mono); }
+  .line:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  .ln { flex: 0 0 52px; text-align: right; padding: 0 10px 0 6px; color: var(--ink-soft);
+    opacity: .6; user-select: none; border-right: 1px solid var(--line); }
+  .lc { padding: 0 14px; white-space: pre; }
+  .meta { padding: 10px 2px 14px; font-size: 12px; color: var(--ink-soft); }
+  .empty { padding: 40px 20px; color: var(--ink-soft); }
+  .empty code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink);
+    color: var(--bg); padding: 8px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: .92; }
+  @media (max-width: 900px) {
+    aside { position: fixed; left: 0; top: 0; transform: translateX(-100%); transition: transform .2s; width: 84vw;
+      z-index: 10; box-shadow: 0 0 40px rgba(0,0,0,.25); }
+    body.open aside { transform: none; }
+    .menu { display: inline-block !important; }
+    .viewer { padding: 12px 12px 40px; }
+    .ln { flex-basis: 40px; }
+  }
+  .menu { display: none; border: 1px solid var(--line); border-radius: 4px; padding: 1px 7px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside id="side">
+    <div class="head">
+      <div class="brand"><a href="index.html">← AI Coding Agent 实战</a></div>
+      <div class="sub">examples/ · 配套代码</div>
+      <input id="filter" class="filter" type="search" placeholder="过滤文件名…" autocomplete="off">
+    </div>
+    <nav id="tree"></nav>
+  </aside>
+  <main>
+    <div class="bar">
+      <button class="menu" id="menu" aria-label="文件列表">☰</button>
+      <span class="path" id="path">选择左侧文件</span>
+      <span class="spacer"></span>
+      <button id="copy" title="复制全文">复制</button>
+      <a id="download" href="#" download>下载</a>
+      <a href="index.html">返回全书</a>
+    </div>
+    <div class="viewer" id="viewer"><div class="empty">从左侧选择文件，或在全书里点击 <code>examples/…</code> 链接。</div></div>
+  </main>
+</div>
+<div class="toast" id="toast">已复制</div>
+
+<script>
+  const FILES = {{MANIFEST}};
+  const byPath = new Map(FILES.map((f) => [f.path, f]));
+  const viewer = document.getElementById('viewer');
+  const pathEl = document.getElementById('path');
+  const filter = document.getElementById('filter');
+  let current = '';
+
+  // ---------- 文件树 ----------
+  function buildTree(files) {
+    const root = { dirs: new Map(), files: [] };
+    for (const f of files) {
+      const parts = f.path.split('/').slice(1); // 去掉顶层 examples
+      let node = root;
+      for (const part of parts.slice(0, -1)) {
+        if (!node.dirs.has(part)) node.dirs.set(part, { dirs: new Map(), files: [] });
+        node = node.dirs.get(part);
+      }
+      node.files.push({ ...f, name: parts[parts.length - 1] });
+    }
+    return root;
+  }
+
+  function renderNode(node, depth) {
+    const frag = document.createDocumentFragment();
+    for (const [name, child] of [...node.dirs.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+      const details = document.createElement('details');
+      details.open = depth < 1;
+      const summary = document.createElement('summary');
+      summary.textContent = name + '/';
+      details.appendChild(summary);
+      details.appendChild(renderNode(child, depth + 1));
+      frag.appendChild(details);
+    }
+    for (const f of node.files.sort((a, b) => a.name.localeCompare(b.name))) {
+      const a = document.createElement('a');
+      a.className = 'file';
+      a.href = '?f=' + encodeURIComponent(f.path);
+      a.dataset.path = f.path;
+      a.textContent = f.name;
+      a.title = f.path;
+      a.addEventListener('click', (e) => { e.preventDefault(); load(f.path); });
+      frag.appendChild(a);
+    }
+    return frag;
+  }
+
+  document.getElementById('tree').appendChild(renderNode(buildTree(FILES), 0));
+
+  // ---------- 过滤 ----------
+  filter.addEventListener('input', () => {
+    const q = filter.value.trim().toLowerCase();
+    document.querySelectorAll('#tree .file').forEach((a) => {
+      a.style.display = !q || a.dataset.path.toLowerCase().includes(q) ? '' : 'none';
+    });
+    document.querySelectorAll('#tree details').forEach((d) => { d.open = Boolean(q); });
+  });
+
+  // ---------- 渲染文件 ----------
+  const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  function renderCode(text) {
+    const lines = text.replace(/\n$/, '').split('\n');
+    const rows = lines.map((l, i) =>
+      `<div class="line"><span class="ln">${i + 1}</span><span class="lc">${escapeHtml(l) || ' '}</span></div>`).join('');
+    return `<div class="meta">${lines.length} 行 · ${(text.length / 1024).toFixed(1)} KB</div>
+      <pre class="code">${rows}</pre>`;
+  }
+
+  async function load(p, push = true) {
+    current = p;
+    document.querySelectorAll('#tree .file').forEach((a) => a.classList.toggle('active', a.dataset.path === p));
+    pathEl.textContent = p;
+    document.getElementById('download').href = p;
+    document.getElementById('download').setAttribute('download', '');
+    if (push) {
+      try { history.replaceState(null, '', '?f=' + encodeURIComponent(p)); } catch {}
+    }
+    if (!byPath.has(p)) {
+      viewer.innerHTML = `<div class="empty">没有这个文件：<code>${escapeHtml(p)}</code></div>`;
+      return;
+    }
+    viewer.innerHTML = '<div class="empty">加载中…</div>';
+    try {
+      const res = await fetch(p, { cache: 'no-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      viewer.innerHTML = renderCode(await res.text());
+      viewer.scrollTop = 0;
+      document.body.classList.remove('open');
+    } catch (err) {
+      viewer.innerHTML = `<div class="empty">读取失败：${escapeHtml(String(err.message))}<br>
+        如果是直接双击打开（file://），浏览器会拦截 fetch；请用静态服务器，例如 <code>npm run serve</code>。</div>`;
+    }
+  }
+
+  // ---------- 复制 ----------
+  document.getElementById('copy').addEventListener('click', async () => {
+    try {
+      const res = await fetch(current);
+      await navigator.clipboard.writeText(await res.text());
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1200);
+    } catch {}
+  });
+
+  document.getElementById('menu').addEventListener('click', () => document.body.classList.toggle('open'));
+
+  // ---------- 启动 ----------
+  const wanted = new URLSearchParams(location.search).get('f');
+  const fallback = byPath.has('examples/README.md') ? 'examples/README.md' : FILES[0]?.path;
+  if (wanted) load(wanted, false);
+  else if (fallback) load(fallback, false);
+</script>
+</body>
+</html>

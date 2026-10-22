@@ -212,6 +212,12 @@ body {
 .toc-chapter > ul li a:hover { color: var(--ink); }
 .toc a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
 
+.foot-link {
+  display: block;
+  margin-top: 6px;
+  font-size: 11.5px;
+  border-bottom: 0;
+}
 .sidebar-foot {
   margin-top: auto;
   padding: 12px 20px;
@@ -304,6 +310,14 @@ blockquote p:last-child { margin-bottom: 0; }
 .callout-tip { border-left: 4px solid #3f8a5c; }
 .callout-warning, .callout-caution { border-left: 4px solid #c05621; }
 .callout-important { border-left: 4px solid #8a4fbd; }
+
+/* 指向配套代码的行内代码链接 */
+a.code-link { border-bottom: 0; color: inherit; }
+a.code-link code {
+  border-bottom: 1px dotted color-mix(in srgb, var(--accent) 55%, transparent);
+  transition: background .15s;
+}
+a.code-link:hover code { background: var(--accent-soft); border-bottom-color: var(--accent); }
 
 /* 代码 */
 code {
