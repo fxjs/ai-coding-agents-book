@@ -139,6 +139,21 @@ body {
   border-radius: 2px;
   padding: 0 1px;
 }
+.occ-nav { display: inline-flex; align-items: center; gap: 2px; }
+.occ-nav[hidden] { display: none; }
+.occ-nav button {
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink-soft);
+  border-radius: 3px;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+}
+.occ-nav button:hover { color: var(--accent); border-color: var(--accent); }
+.occ-count { font-variant-numeric: tabular-nums; min-width: 34px; text-align: center; }
 .search-hint { flex: 1 1 auto; text-align: right; opacity: .8; }
 .search-clear {
   flex: 0 0 auto;
@@ -155,6 +170,18 @@ body {
 }
 .search-clear:hover { color: var(--accent); border-color: var(--accent); }
 .search-empty { font-size: 12px; line-height: 1.65; color: var(--ink-soft); padding: 2px 10px 10px; }
+
+/* 正文内全部命中与当前命中（CSS Custom Highlight API） */
+::highlight(search-hit) {
+  background-color: rgba(180, 83, 42, 0.22);
+  background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: inherit;
+}
+::highlight(search-current) {
+  background-color: rgba(180, 83, 42, 0.55);
+  background-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  color: inherit;
+}
 
 /* 跳转后的目标高亮 */
 .flash { animation: flash 2.2s ease-out; }

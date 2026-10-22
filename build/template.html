@@ -177,6 +177,7 @@
     if (!show) { results.innerHTML = ''; return; }
 
     if (!hits.length) {
+      clearOccurrences();
       results.innerHTML = `<div class="search-status">没有匹配「${escapeHtml(query)}」</div>
         <div class="search-empty">试试更短的关键词、英文命令名（如 <code>--tools</code>），或换个说法。</div>`;
       return;
@@ -196,13 +197,96 @@
 
     results.innerHTML = `<div class="search-status">
       <span>${hits.length}${hits.length === 40 ? '+' : ''} 条结果</span>
+      <span class="occ-nav" hidden>
+        <button type="button" class="occ-prev" title="上一处（Shift+F3）">‹</button>
+        <span class="occ-count">0/0</span>
+        <button type="button" class="occ-next" title="下一处（F3）">›</button>
+      </span>
       <span class="search-hint">↑↓ 选择 · Enter 跳转 · Esc 清除</span>
       <button type="button" class="search-clear" title="清空搜索（Esc）">×</button>
     </div>${list}`;
     results.querySelector('.search-clear').addEventListener('click', resetSearch);
+    results.querySelector('.occ-prev').addEventListener('click', () => focusOccurrence(occIndex - 1));
+    results.querySelector('.occ-next').addEventListener('click', () => focusOccurrence(occIndex + 1));
 
     results.querySelectorAll('.hit').forEach((btn) => {
       btn.addEventListener('click', () => jump(Number(btn.dataset.i)));
+    });
+
+    buildOccurrences(terms);
+    updateOccUI();
+  }
+
+  // ---------------- 正文内全部命中高亮（CSS Custom Highlight API） ----------------
+  const supportsHighlight =
+    typeof CSS !== 'undefined' && !!CSS.highlights && typeof Highlight !== 'undefined';
+  let occRanges = [];
+  let occIndex = -1;
+
+  function clearOccurrences() {
+    occRanges = [];
+    occIndex = -1;
+    if (supportsHighlight) {
+      CSS.highlights.delete('search-hit');
+      CSS.highlights.delete('search-current');
+    }
+    updateOccUI();
+  }
+
+  function buildOccurrences(terms) {
+    clearOccurrences();
+    if (!supportsHighlight || !terms.length) return;
+    const root = document.querySelector('article');
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        const p = node.parentElement;
+        if (!p || p.closest('.mermaid, script, style')) return NodeFilter.FILTER_REJECT;
+        return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      },
+    });
+    const re = new RegExp('(' + terms.map(escapeRe).join('|') + ')', 'gi');
+    const CAP = 600;
+    const seen = new Set();
+    let node;
+    outer: while ((node = walker.nextNode())) {
+      const text = node.nodeValue;
+      re.lastIndex = 0;
+      let m;
+      while ((m = re.exec(text))) {
+        const key = `${node.__occKey ??= Math.random()}:${m.index}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          const range = new Range();
+          range.setStart(node, m.index);
+          range.setEnd(node, m.index + m[0].length);
+          occRanges.push(range);
+        }
+        if (occRanges.length >= CAP) break outer;
+        if (m.index === re.lastIndex) re.lastIndex++;
+      }
+    }
+    if (occRanges.length) CSS.highlights.set('search-hit', new Highlight(...occRanges));
+  }
+
+  function focusOccurrence(i, smooth = true) {
+    if (!occRanges.length) return;
+    occIndex = (i + occRanges.length) % occRanges.length;
+    if (supportsHighlight) {
+      CSS.highlights.set('search-current', new Highlight(occRanges[occIndex]));
+    }
+    const host = occRanges[occIndex].startContainer.parentElement;
+    host?.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' });
+    updateOccUI();
+  }
+
+  function updateOccUI() {
+    const nav = results.querySelector('.occ-nav');
+    if (!nav) return;
+    nav.hidden = occRanges.length === 0;
+    const label = results.querySelector('.occ-count');
+    if (label) label.textContent = `${occIndex < 0 ? 0 : occIndex + 1}/${occRanges.length}`;
+    results.querySelectorAll('.hit').forEach((b, k) => {
+      if (k === cursor) b.classList.add('active');
     });
   }
 
@@ -214,6 +298,19 @@
     void hit.el.offsetWidth;
     hit.el.classList.add('flash');
     setTimeout(() => hit.el.classList.remove('flash'), 2200);
+    // 让「当前命中」落在这一条结果内（没有则取其后第一处）
+    if (occRanges.length) {
+      const inside = occRanges.findIndex((r) => hit.el.contains(r.startContainer));
+      if (inside >= 0) focusOccurrence(inside, false);
+      else {
+        const top = hit.el.getBoundingClientRect().top;
+        const after = occRanges.findIndex(
+          (r) => (r.startContainer.parentElement?.getBoundingClientRect().top ?? 0) >= top,
+        );
+        focusOccurrence(after >= 0 ? after : 0, false);
+      }
+    }
+
     // 记住位置（file:// 的 origin 为 null，replaceState 可能抛错，忽略即可）
     try {
       if (hit.el.id) history.replaceState(null, '', '#' + hit.el.id);
@@ -237,6 +334,7 @@
   function resetSearch() {
     search.value = '';
     renderHits('');
+    clearOccurrences();
     search.blur();
   }
 
@@ -264,11 +362,16 @@
   });
 
   document.addEventListener('keydown', (e) => {
-    const typing = e.target.closest('input, textarea, [contenteditable]');
+    const target = e.target instanceof Element ? e.target : null;
+    const typing = target?.closest('input, textarea, [contenteditable]');
     if ((e.key === '/' && !typing) || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) {
       e.preventDefault(); search.focus(); search.select();
     }
     if (e.key === 'Escape' && document.activeElement === search) resetSearch();
+    if (e.key === 'F3' && occRanges.length) {
+      e.preventDefault();
+      focusOccurrence(occIndex + (e.shiftKey ? -1 : 1));
+    }
   });
 
   buildIndex();
