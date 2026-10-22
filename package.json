@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "《AI 编码代理实战：Pi、Claude Code 与 Codex》书稿与配套代码",
+  "description": "《AI Coding Agent 实战：Pi、Claude Code 与 Codex》书稿与配套代码",
   "scripts": {
     "build": "node build/build.mjs",
     "check": "node build/check.mjs",

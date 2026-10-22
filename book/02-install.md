@@ -9,7 +9,7 @@
 
 ```bash
 node -v          # Pi 要求 >= 22.19；Claude Code / Codex 的 npm 安装也需要 Node
-git --version    # 代理大量依赖 git 做差异与回滚
+git --version    # agent 大量依赖 git 做差异与回滚
 echo $TERM       # 应为 xterm-256color 或类似；tmux/screen 也可
 ```
 
@@ -82,7 +82,7 @@ flowchart TD
   A[你有哪种凭证] --> B{订阅账号?}
   B -->|有 ChatGPT/Claude 订阅| C[交互式登录]
   B -->|只有 API Key| D[环境变量或 auth 文件]
-  B -->|企业网关| E[Bedrock / Vertex / Azure / 代理]
+  B -->|企业网关| E[Bedrock / Vertex / Azure / agent]
   B -->|完全离线| F[本地模型<br/>llama.cpp / ollama / lmstudio]
 ```
 

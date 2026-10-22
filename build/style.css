@@ -73,6 +73,80 @@ body {
 .search:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 
 .toc { list-style: none; margin: 0; padding: 12px 8px 24px; font-size: 13.5px; }
+
+/* ---------------- 全文检索结果 ---------------- */
+.sidebar.searching nav { display: none; }
+.search-results { flex: 1; min-height: 0; overflow-y: auto; padding: 4px 8px 16px; }
+.search-results[hidden] { display: none; }
+.search-status {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px 10px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+  z-index: 1;
+}
+.hit {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 6px;
+  padding: 7px 10px 8px;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.hit:hover, .hit:focus-visible { background: var(--accent-soft); outline: none; }
+.hit.active { border-left-color: var(--accent); background: var(--accent-soft); }
+.hit-crumb {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 3px;
+  min-width: 0;
+}
+.hit-crumb > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hit-kind {
+  flex: 0 0 auto;
+  font-size: 10px;
+  line-height: 1.5;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0 4px;
+}
+.hit-text { display: block; font-size: 12.6px; line-height: 1.55; overflow-wrap: anywhere; }
+.hit[data-kind="PRE"] .hit-text { font-family: var(--mono); font-size: 11.8px; }
+.hit-preview {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink-soft);
+  font-size: 11.8px;
+  line-height: 1.5;
+}
+.hit-text mark {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+.search-empty { font-size: 12px; line-height: 1.65; color: var(--ink-soft); padding: 2px 10px 10px; }
+
+/* 跳转后的目标高亮 */
+.flash { animation: flash 2.2s ease-out; }
+@keyframes flash {
+  0% { background: color-mix(in srgb, var(--accent) 24%, transparent); }
+  100% { background: transparent; }
+}
 .toc a { border-bottom: 0; }
 .toc-chapter > a {
   display: block;

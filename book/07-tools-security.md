@@ -7,7 +7,7 @@
 
 ## 7.1 先想清楚你在防什么
 
-代理的风险不是「模型有恶意」，而是**模型在错误的上下文里做了合理但危险的事**：
+Agent 的风险不是「模型有恶意」，而是**模型在错误的上下文里做了合理但危险的事**：
 
 | 风险 | 具体例子 | 后果 |
 |---|---|---|
@@ -29,7 +29,7 @@
 | 搜索 | `grep`、`find`、`ls` | `Grep`、`Glob`、`LS` | 走 shell（自带 `rg`） |
 | 网页 | 扩展提供 | `WebFetch`、`WebSearch` | `web_search`（`--search`） |
 | 计划 | 扩展提供 | `TodoWrite`、Plan | `update_plan`、`/plan` |
-| 子代理 | 扩展提供 | `Task` | `spawn_agent`/`wait`/`close_agent` |
+| subagent | 扩展提供 | `Task` | `spawn_agent`/`wait`/`close_agent` |
 | 脚本化调工具 | `codemode`、`tool_search` | — | code mode |
 
 **工具越少，攻击面越小，模型也越专注。** Pi 默认只开 4 个，是刻意的设计，不是功能缺失。
@@ -70,7 +70,7 @@ pi.on("tool_call", async (event, ctx) => {
 
 | 手段 | 防什么 | 不防什么 |
 |---|---|---|
-| `--tools` / `--no-tools` | 代理主动越界 | 你要求的危险操作 |
+| `--tools` / `--no-tools` | agent 主动越界 | 你要求的危险操作 |
 | `tool_call` 门禁 | 已知的危险命令/路径 | 没见过的新花样 |
 | 项目信任 | 恶意项目资源 | 恶意指令（AGENTS.md 仍会读） |
 | 容器/VM | 一切越界与提权 | 容器内挂载的凭证 |
@@ -225,7 +225,7 @@ network_access = false
 writable_roots = ["."]
 ```
 
-三者共同的验收标准：**让代理尝试 `git push --force`，三个工具都应该拦下来**。没拦住的那一层，就是你的风险敞口。
+三者共同的验收标准：**让 agent 尝试 `git push --force`，三个工具都应该拦下来**。没拦住的那一层，就是你的风险敞口。
 
 ## 7.7 审计：事后能查
 
@@ -236,7 +236,7 @@ writable_roots = ["."]
 | 变更审查 | `git diff` | `git diff` / `/rewind` | `git diff` / `codex apply` 前审 patch |
 | 成本审计 | `/session`、页脚 | `/cost`、`/usage` | `/usage`、statusline |
 
-工程习惯：**CI 里所有代理运行都保存事件流**，出问题时能复盘「它到底跑了什么命令」，而不是靠记忆。
+工程习惯：**CI 里所有 agent 运行都保存事件流**，出问题时能复盘「它到底跑了什么命令」，而不是靠记忆。
 
 ## 7.8 prompt injection：唯一不能靠权限解决的问题
 
@@ -254,7 +254,7 @@ writable_roots = ["."]
 2. **网络默认关**：`--network none`（容器）、Codex `network_access = false`、Claude 的 Bash 网络限制。
 3. **敏感路径只读**：`~/.ssh`、`~/.aws`、`.env` 不进可写/可读范围。
 4. **拒绝 `curl | sh`**：三家都能用钩子/门禁拦（示例扩展里就有这条）。
-5. **人工 review 高危 diff**：涉及 CI 配置、依赖版本、权限文件、加密相关代码时，别让代理自己合并。
+5. **人工 review 高危 diff**：涉及 CI 配置、依赖版本、权限文件、加密相关代码时，别让 agent 自己合并。
 
 ## 7.9 技巧与坑
 
@@ -276,4 +276,4 @@ writable_roots = ["."]
 
 ---
 
-下一章：把团队的隐知识固化成技能，让代理每次都按同一套流程做事。
+下一章：把团队的隐知识固化成技能，让 agent 每次都按同一套流程做事。

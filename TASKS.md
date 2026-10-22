@@ -1,7 +1,7 @@
 # 任务清单（写作进度）
 
 > 书籍工程：`~/hubGit/ai-coding-agents-book`
-> 目标：一本面向软件开发者的、可直接照着做的 AI 编码代理实战书，覆盖 Pi / Claude Code / Codex 的**装、用、配、扩、调、迁**与**原理**。
+> 目标：一本面向软件开发者的、可直接照着做的 AI Coding Agent 实战书，覆盖 Pi / Claude Code / Codex 的**装、用、配、扩、调、迁**与**原理**。
 > 对照版本：Pi 1.4.0、Claude Code 2.1.303、Codex CLI 0.163.0。
 
 ## 阶段一：工程骨架
@@ -17,7 +17,7 @@
 ## 阶段二：正文章节（17 章）
 
 - [x] T10 `book/00-preface.md` 前言：为什么现在、读者、三条心态
-- [x] T11 `book/01-landscape.md` 从补全到代理：agent loop、token 预算、三家架构
+- [x] T11 `book/01-landscape.md` 从补全到 agent：agent loop、token 预算、三家架构
 - [x] T12 `book/02-install.md` 安装、认证与第一个可用配置
 - [x] T13 `book/03-first-task.md` 第一次结对：任务卡 + 三种打法
 - [x] T14 `book/04-interactive.md` 交互式：界面、键位、斜杠命令来源
@@ -28,10 +28,10 @@
 - [x] T19 `book/09-mcp-hooks-plugins.md` MCP、Hooks、插件与扩展
 - [x] T20 `book/10-models-cost.md` 模型、思考等级与成本（含算账）
 - [x] T21 `book/11-workflows.md` 五大实战工作流
-- [x] T22 `book/12-multi-agent.md` 多代理、并行与云端
+- [x] T22 `book/12-multi-agent.md` 多 agent、并行与云端
 - [x] T23 `book/13-pi.md` 工具专章：Pi（生态、配置、扩展全景、边界）
 - [x] T24 `book/14-claude-code.md` 工具专章：Claude Code（权限、checkpoint、后台/云）
-- [x] T25 `book/15-codex.md` 工具专章：Codex（沙箱、审批、exec 流水线、多代理）
+- [x] T25 `book/15-codex.md` 工具专章：Codex（沙箱、审批、exec 流水线、多 agent）
 - [x] T26 `book/16-internals.md` 内部原理：60 行迷你 agent、会话格式、压缩算法、RPC
 - [x] T27 `book/17-migration.md` 横向对比、选型与迁移
 
@@ -54,13 +54,15 @@
 - [x] T43 术语/笔误抽查（享试等已修）
 - [x] T44 示例工程测试（8 passed）、扩展类型检查（tsc 0 error）
 - [x] T45 README 与任务清单收尾
+- [x] T46 侧栏全文检索：标题/正文/代码索引、命中高亮、上下文片段、↑↓/Enter/Esc、跳转定位
+- [x] T47 术语统一：`agent` 不译（去掉「编码代理/多代理」等译法），标题用 Agent
 
 ## 验收记录（最后一次构建）
 
 | 项 | 结果 |
 |---|---|
 | 文件数 | 23（README + 17 章 + 4 附录 + 1 规范） |
-| 正文字数 | 34,300 汉字（约 44,200 词/字，含代码与符号） |
+| 正文字数 | 34,300 汉字（约 44,000 词/字，含代码与符号） |
 | 表格 | 250+ |
 | Mermaid 图 | 30 |
 | 代码块 | 130+ |

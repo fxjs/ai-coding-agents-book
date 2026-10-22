@@ -1,10 +1,8 @@
-# AI 编码代理实战
+# AI Coding Agent 实战
 
 **Pi、Claude Code 与 Codex 全景指南**
 
 一本写给软件开发者、能照着敲、也能读懂原理的书。
-
-![预览](assets/preview.jpg)
 
 > 基准版本：Pi `1.4.0` · Claude Code `2.1.303` · Codex CLI `0.163.0`
 > 命令细节以 `--help` 与交互内 `/` 菜单为准；版本敏感处已标注。
@@ -13,7 +11,7 @@
 
 ## 这本书要解决什么问题
 
-你已经会用 AI 写代码了——至少会把一段代码贴进对话框。但从「贴代码」到「让代理在你的仓库里自主干活」，中间隔着一整套工程细节：
+你已经会用 AI 写代码了——至少会把一段代码贴进对话框。但从「贴代码」到「让 agent 在你的仓库里自主干活」，中间隔着一整套工程细节：
 
 - 三个工具到底有什么不同？我的项目该用哪个，或者怎么组合？
 - 为什么同一个模型，别人用起来像资深工程师，我用起来像实习生？
@@ -28,7 +26,7 @@
 
 | 你是 | 怎么读 |
 |---|---|
-| 第一次接触编码代理 | 第 1–3 章顺序读，先跑起来 |
+| 第一次接触 coding agent | 第 1–3 章顺序读，先跑起来 |
 | 已经在用其中一个 | 第 4–7 章补课，对应工具专章（13/14/15）查漏，第 17 章看迁移 |
 | 要把它接进团队/CI | 第 5、7、9、11、12 章 |
 | 想写扩展、做二次开发 | 第 8、9、13、16 章 + `examples/pi-extensions` |
@@ -40,23 +38,23 @@
 
 | 章 | 标题 | 一句话 |
 |---|---|---|
-| 0 | [前言：为什么现在要学编码代理](book/00-preface.md) | 工具变了，工作方式也要变 |
-| 1 | [从代码补全到编码代理](book/01-landscape.md) | agent loop、工具、上下文，三家的架构差异 |
+| 0 | [前言：为什么现在要学 coding agent](book/00-preface.md) | 工具变了，工作方式也要变 |
+| 1 | [从代码补全到 coding agent](book/01-landscape.md) | agent loop、工具、上下文，三家的架构差异 |
 | 2 | [安装、认证与第一个可用配置](book/02-install.md) | 装好、登录、选模型、跑通第一句 |
 | 3 | [第一次结对：一个任务，三种打法](book/03-first-task.md) | 同一个需求，Pi / Claude / Codex 各做一遍 |
 | 4 | [交互式使用：界面、键位与斜杠命令](book/04-interactive.md) | TUI 分区、消息队列、命令体系 |
 | 5 | [非交互与自动化：一次执行、结构化输出与 RPC](book/05-headless.md) | print、JSON、RPC、SDK、CI 里的用法 |
-| 6 | [上下文工程：指令文件、会话树与压缩](book/06-context.md) | 让代理「记住」正确的东西 |
+| 6 | [上下文工程：指令文件、会话树与压缩](book/06-context.md) | 让 agent「记住」正确的东西 |
 | 7 | [工具、权限与沙箱](book/07-tools-security.md) | 工具清单、权限模式、隔离方案 |
 | 8 | [技能与提示模板](book/08-skills.md) | 把团队经验固化成可复用资产 |
 | 9 | [MCP、Hooks、插件与扩展](book/09-mcp-hooks-plugins.md) | 生态的四种扩展点 |
 | 10 | [模型、思考等级与成本](book/10-models-cost.md) | 选模型、控预算、本地部署 |
 | 11 | [实战工作流：TDD、重构、审查、排错](book/11-workflows.md) | 五个高频场景的完整提示词与流程 |
-| 12 | [多代理、并行与云端](book/12-multi-agent.md) | 子代理、worktree、后台与云任务 |
+| 12 | [多 agent、并行与云端](book/12-multi-agent.md) | subagent、worktree、后台与云任务 |
 | 13 | [工具专章：Pi](book/13-pi.md) | 可编程内核、多 provider 路由、SDK 嵌入 |
 | 14 | [工具专章：Claude Code](book/14-claude-code.md) | 权限三件套、checkpoint、后台与云 |
-| 15 | [工具专章：Codex](book/15-codex.md) | 沙箱 × 审批、exec 流水线、多代理 |
-| 16 | [内部原理：代理循环、协议与会话格式](book/16-internals.md) | 自己实现一个迷你 agent |
+| 15 | [工具专章：Codex](book/15-codex.md) | 沙箱 × 审批、exec 流水线、多 agent |
+| 16 | [内部原理：agent loop、协议与会话格式](book/16-internals.md) | 自己实现一个迷你 agent |
 | 17 | [横向对比、选型与迁移](book/17-migration.md) | 决策矩阵与配置迁移 |
 
 ### 附录
@@ -86,7 +84,7 @@ examples/
 ├── skills/code-review/  # 可复用的审查技能
 ├── prompts/             # 提示模板
 ├── mcp/                 # MCP 配置样例
-└── ci/                  # GitHub Actions 中的代理用法
+└── ci/                  # GitHub Actions 中的agent用法
 ```
 
 第 3 章起的所有练习都基于 `examples/task-cli`。它刻意做得小：一个 JSON 存储的待办 CLI，零运行时依赖。
@@ -103,6 +101,13 @@ npm run test:examples   # 跑 examples/task-cli 的 8 个测试
 
 构建脚本零依赖：自带 Markdown 子集解析器；Mermaid 图联网时渲染，离线时回退为源码块。
 `dist/book.md` 是合并版，可直接喂给 pandoc 生成 PDF/EPUB。
+
+### 阅读体验
+
+- **全文检索**：按 `/` 聚焦搜索框，输入任意词即可检索**标题、正文与代码块**（多关键词用空格分隔，AND 匹配）。
+  结果带章节位置、命中高亮与上下文片段；`↑`/`↓` 选择，`Enter` 跳转到正文并高亮，`Esc` 清空。
+- **目录联动**：侧栏随滚动高亮当前小节，`Ctrl+Shift+F`（浏览器内）可搜索页面。
+- **单文件**：`dist/index.html` 自包含（CSS/JS/索引都在里面），双击即可离线阅读。
 
 ## 排版约定
 

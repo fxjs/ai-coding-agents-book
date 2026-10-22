@@ -3,19 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI 编码代理实战：Pi、Claude Code 与 Codex</title>
-<meta name="description" content="面向软件开发者的 AI 编码代理实战指南，覆盖安装、交互、自动化、上下文工程、扩展、多代理与内部原理。">
+<title>AI Coding Agent 实战：Pi、Claude Code 与 Codex</title>
+<meta name="description" content="面向软件开发者的 AI Coding Agent 实战指南，覆盖安装、交互、自动化、上下文工程、扩展、多 agent 与内部原理。">
 <style>{{CSS}}</style>
 </head>
 <body>
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <header class="sidebar-head">
-      <div class="brand">AI 编码代理实战</div>
+      <div class="brand">AI Coding Agent 实战</div>
       <div class="brand-sub">Pi · Claude Code · Codex</div>
       <div class="meta">{{CHAPTERS}} 篇 · {{WORDS}} 字 · {{DATE}}</div>
-      <input id="search" class="search" type="search" placeholder="搜索章名 / 小节…" autocomplete="off">
+      <input id="search" class="search" type="search" placeholder="搜索全文：标题 / 正文 / 代码…" autocomplete="off"
+             role="combobox" aria-expanded="false" aria-controls="search-results" aria-autocomplete="list">
     </header>
+    <div class="search-results" id="search-results" role="listbox" aria-label="搜索结果" hidden></div>
     <nav>
       <ul class="toc">
 {{TOC}}
@@ -73,29 +75,193 @@
 </script>
 
 <script>
-  // 目录搜索
+  // ---------------- 全文检索 ----------------
+  // 索引在页面加载后从 DOM 构建：零额外网络请求、离线可用、永远与正文同步。
   const search = document.getElementById('search');
-  const chapters = [...document.querySelectorAll('.toc-chapter')];
-  search.addEventListener('input', () => {
-    const q = search.value.trim().toLowerCase();
-    for (const ch of chapters) {
-      let any = false;
-      const self = ch.dataset.search.includes(q);
-      ch.style.display = self || !q ? '' : 'none';
-      for (const li of ch.querySelectorAll('li')) {
-        const hit = li.dataset.search.includes(q);
-        li.style.display = !q || hit || self ? '' : 'none';
-        any = any || hit;
-      }
-      if (q && !self && !any) ch.style.display = 'none';
-      const sub = ch.querySelector('ul');
-      if (sub) sub.style.display = q && !self && !any ? 'none' : '';
+  const results = document.getElementById('search-results');
+  const sidebar = document.getElementById('sidebar');
+  let INDEX = [];
+  let hits = [];
+  let cursor = -1;
+  let timer = 0;
+  let currentQuery = '';
+
+  const escapeHtml = (s) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  function buildIndex() {
+    const blocks = document.querySelectorAll(
+      'article section h1, article section h2, article section h3, article section p, article section li, article section pre, article section td',
+    );
+    let chapter = '';
+    let section = '';
+    INDEX = [];
+    for (const el of blocks) {
+      // 只索引最内层块，避免父子重复计分
+      if (el.querySelector('h1,h2,h3,p,li,pre,td')) continue;
+      const raw = (el.innerText || '').replace(/\s+/g, ' ').trim();
+      if (raw.length < 2) continue;
+      if (el.tagName === 'H1') { chapter = raw; section = ''; }
+      if (el.tagName === 'H2') section = raw;
+      INDEX.push({
+        el,
+        raw,
+        lower: raw.toLowerCase(),
+        chapter,
+        section,
+        kind: el.tagName,
+      });
     }
+    // 标题后面往往紧跟一段定义，用它给标题命中补上下文
+    for (let i = 0; i < INDEX.length; i++) {
+      if (!INDEX[i].kind.startsWith('H')) continue;
+      const next = INDEX.slice(i + 1, i + 6).find(
+        (e) => !e.kind.startsWith('H') && e.raw.length >= 36 && !/[：:]$/.test(e.raw),
+      );
+      if (next) INDEX[i].preview = next.raw.slice(0, 120);
+    }
+  }
+
+  const KIND_RANK = { H1: 0, H2: 1, H3: 2, LI: 3, TD: 3, P: 4, PRE: 5 };
+
+  function runSearch(query) {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length) return [];
+    const found = [];
+    for (let i = 0; i < INDEX.length; i++) {
+      const e = INDEX[i];
+      let first = -1;
+      let ok = true;
+      for (const t of terms) {
+        const at = e.lower.indexOf(t);
+        if (at < 0) { ok = false; break; }
+        if (first < 0 || at < first) first = at;
+      }
+      if (!ok) continue;
+      // 标题优先，其次正文/代码；同类按出现位置
+      found.push({ ...e, idx: i, first, score: (KIND_RANK[e.kind] ?? 6) * 1e6 + first });
+    }
+    found.sort((a, b) => a.score - b.score);
+    return found.slice(0, 40);
+  }
+
+  function snippet(text, first, terms) {
+    const pad = 34;
+    let start = Math.max(0, first - pad);
+    let end = Math.min(text.length, first + 110);
+    if (start > 0) start = text.indexOf(' ', start) + 1 || start;
+    if (end < text.length) end = text.lastIndexOf(' ', end) < start ? end : text.lastIndexOf(' ', end);
+    const piece = (start > 0 ? '… ' : '') + text.slice(start, end) + (end < text.length ? ' …' : '');
+    const re = new RegExp('(' + terms.map(escapeRe).join('|') + ')', 'gi');
+    let out = '';
+    let last = 0;
+    let m;
+    while ((m = re.exec(piece))) {
+      out += escapeHtml(piece.slice(last, m.index)) + '<mark>' + escapeHtml(m[0]) + '</mark>';
+      last = m.index + m[0].length;
+      if (m.index === re.lastIndex) re.lastIndex++;
+    }
+    return out + escapeHtml(piece.slice(last));
+  }
+
+  function renderHits(query) {
+    currentQuery = query;
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    hits = query.trim().length >= 1 ? runSearch(query) : [];
+    cursor = -1;
+    const show = Boolean(query.trim());
+    sidebar.classList.toggle('searching', show);
+    results.hidden = !show;
+    search.setAttribute('aria-expanded', String(show));
+    if (!show) { results.innerHTML = ''; return; }
+
+    if (!hits.length) {
+      results.innerHTML = `<div class="search-status">没有匹配「${escapeHtml(query)}」</div>
+        <div class="search-empty">试试更短的关键词、英文命令名（如 <code>--tools</code>），或换个说法。</div>`;
+      return;
+    }
+
+    const list = hits.map((h, i) => {
+      const crumb = [h.chapter, h.section].filter(Boolean).join(' · ');
+      const kind = h.kind === 'PRE' ? '代码' : h.kind.startsWith('H') ? '标题' : '正文';
+      const body = h.kind.startsWith('H') && h.preview
+        ? `${snippet(h.raw, h.first, terms)}<span class="hit-preview">${snippet(h.preview, 0, terms)}</span>`
+        : snippet(h.raw, h.first, terms);
+      return `<button class="hit" type="button" role="option" data-i="${i}" data-kind="${h.kind}">
+        <span class="hit-crumb">${escapeHtml(crumb || '正文')}<span class="hit-kind">${kind}</span></span>
+        <span class="hit-text">${body}</span>
+      </button>`;
+    }).join('');
+
+    results.innerHTML = `<div class="search-status"><span>${hits.length}${hits.length === 40 ? '+' : ''} 条结果</span>
+      <span>↑↓ 选择 · Enter 跳转 · Esc 清除</span></div>${list}`;
+
+    results.querySelectorAll('.hit').forEach((btn) => {
+      btn.addEventListener('click', () => jump(Number(btn.dataset.i)));
+    });
+  }
+
+  function jump(i) {
+    const hit = hits[i];
+    if (!hit) return;
+    hit.el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    hit.el.classList.remove('flash');
+    void hit.el.offsetWidth;
+    hit.el.classList.add('flash');
+    setTimeout(() => hit.el.classList.remove('flash'), 2200);
+    // 记住位置，方便 Esc 后回看
+    if (hit.el.id) history.replaceState(null, '', '#' + hit.el.id);
+  }
+
+  function moveCursor(delta) {
+    if (!hits.length) return;
+    cursor = (cursor + delta + hits.length) % hits.length;
+    results.querySelectorAll('.hit').forEach((b, i) => {
+      b.classList.toggle('active', i === cursor);
+      b.setAttribute('aria-selected', String(i === cursor));
+    });
+    const active = results.querySelector('.hit.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+
+  function resetSearch() {
+    search.value = '';
+    renderHits('');
+    search.blur();
+  }
+
+  search.addEventListener('input', () => {
+    clearTimeout(timer);
+    const q = search.value;
+    timer = setTimeout(() => renderHits(q), 90);
   });
+
+  search.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveCursor(1); results.querySelector('.hit')?.focus({ preventScroll: true }); }
+    if (e.key === 'Enter' && hits.length) { e.preventDefault(); jump(cursor < 0 ? 0 : cursor); }
+    if (e.key === 'Escape') { e.preventDefault(); resetSearch(); }
+  });
+
+  results.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveCursor(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); moveCursor(-1); }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (cursor < 0) cursor = 0;
+      jump(cursor);
+      results.querySelector('.hit.active')?.focus({ preventScroll: true });
+    } else if (e.key === 'Escape') { e.preventDefault(); resetSearch(); }
+  });
+
   document.addEventListener('keydown', (e) => {
-    if (e.key === '/' && document.activeElement !== search) { e.preventDefault(); search.focus(); }
-    if (e.key === 'Escape' && document.activeElement === search) { search.value = ''; search.dispatchEvent(new Event('input')); search.blur(); }
+    if (e.key === '/' && document.activeElement !== search && !e.target.closest('input, textarea')) {
+      e.preventDefault(); search.focus(); search.select();
+    }
+    if (e.key === 'Escape' && document.activeElement === search) resetSearch();
   });
+
+  buildIndex();
 
   // 阅读进度
   const bar = document.getElementById('bar');

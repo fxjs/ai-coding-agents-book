@@ -12,7 +12,7 @@ flowchart TB
   A[Codex] --> B[执行层<br/>沙箱 seatbelt / landlock<br/>审批策略 + auto-review]
   A --> C[工具层<br/>apply_patch · exec_command<br/>write_stdin · web_search<br/>update_plan · view_image]
   A --> D[会话层<br/>rollout · resume · fork<br/>archive · queue · agents]
-  A --> E[多代理<br/>spawn_agent · wait · close_agent]
+  A --> E[多 agent<br/>spawn_agent · wait · close_agent]
   A --> F[扩展<br/>plugins · skills · hooks<br/>MCP · execpolicy .rules]
   A --> G[接口<br/>TUI · exec · app-server<br/>remote · cloud]
   A --> H[实验开关<br/>features list/enable/disable]
@@ -134,9 +134,9 @@ git -C .worktrees/<name> diff
 codex archive <session-id>
 ```
 
-## 15.6 多代理
+## 15.6 多 Agent
 
-Codex 的多代理是「任务」级的：每个子代理是一条独立 thread，有自己的上下文。
+Codex 的多 agent 是「任务」级的：每个 subagent 是一条独立 thread，有自己的上下文。
 
 ```text
 # TUI 内
@@ -148,15 +148,15 @@ Codex 的多代理是「任务」级的：每个子代理是一条独立 thread�
 | 工具 | 用途 |
 |---|---|
 | `spawn_agent` | 派生一个子任务（继承当前工作目录） |
-| `send_input` | 给子代理追加指令 |
-| `wait` | 等待子代理完成或需要审批 |
+| `send_input` | 给 subagent 追加指令 |
+| `wait` | 等待 subagent 完成或需要审批 |
 | `close_agent` | 关闭 |
 
 实践建议：
 
-- 让子代理做**只读调查**（三个角度并行），主代理汇总——这是最安全也最省上下文的用法。
-- 需要在子代理之间共享文件时，用 worktree 隔离，否则会互相覆盖。
-- 子代理的审批请求会冒泡到主会话，别在无人值守时指望它自动解决。
+- 让 subagent 做**只读调查**（三个角度并行），主 agent 汇总——这是最安全也最省上下文的用法。
+- 需要在 subagent 之间共享文件时，用 worktree 隔离，否则会互相覆盖。
+- subagent 的审批请求会冒泡到主会话，别在无人值守时指望它自动解决。
 
 ## 15.7 TUI 里值得知道的命令
 
@@ -223,8 +223,8 @@ codex remote-control             # 管理带远程控制的 daemon
 2. 写一个 `review` profile，让 `codex -p review` 等价于「高思考 + 只读 + 不问人」。
 3. 用 `--worktree` 并行开两个方案，比较 patch 与测试结果后合并其中一个。
 4. 用 `codex exec --json` + `jq` 统计一次任务的 turn、工具调用与 token。
-5. 故意让代理访问 `~/.ssh`，确认沙箱拦住，并记录报错；再把它加进你的安全测试用例。
+5. 故意让 agent 访问 `~/.ssh`，确认沙箱拦住，并记录报错；再把它加进你的安全测试用例。
 
 ---
 
-下一章拆开引擎盖：自己实现一个编码代理需要哪些零件。
+下一章拆开引擎盖：自己实现一个 coding agent 需要哪些零件。

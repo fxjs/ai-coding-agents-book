@@ -74,7 +74,7 @@ claude                 # 交互
 claude -p "…"          # 一次性
 claude mcp add|list|remove|add-json|add-from-claude-desktop|serve
 claude plugin ...      # 插件
-claude agents ...      # 后台代理（--bg 启动的会话）
+claude agents ...      # 后台 agent（--bg 启动的会话）
 claude auth ...        # 认证
 claude setup-token     # 长期 token（需订阅）
 claude doctor          # 体检
@@ -177,7 +177,7 @@ codex app-server / remote-control   # 服务化（实验）
 | 会话目录 | `PI_CODING_AGENT_SESSION_DIR` | — | — |
 | 离线 | `PI_OFFLINE=1` | — | — |
 | 遥测 | `PI_TELEMETRY=0` | — | — |
-| 代理 | `HTTP_PROXY` / `HTTPS_PROXY` | 同 | 同 |
+| 代理（proxy） | `HTTP_PROXY` / `HTTPS_PROXY` | 同 | 同 |
 
 ## A.6 退出码约定（脚本化时用）
 

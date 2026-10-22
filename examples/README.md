@@ -7,7 +7,7 @@
 | `skills/code-review/` | 团队代码审查技能（`SKILL.md`） | 8 |
 | `prompts/` | 提示模板：重构、排错、迁移 | 8、11 |
 | `mcp/` | MCP 服务器配置样例（项目级/用户级） | 9 |
-| `ci/` | GitHub Actions 中调用代理的三种写法 | 5、11 |
+| `ci/` | GitHub Actions 中调用 agent 的三种写法 | 5、11 |
 
 ## 快速自检
 

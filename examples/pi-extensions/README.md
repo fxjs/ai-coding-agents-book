@@ -27,7 +27,7 @@ tsc -p tsconfig.json
 
 # 2) 交互内
 /guard                     # 查看当前规则
-让代理执行 git push --force   # 应被拦截
+让agent执行 git push --force   # 应被拦截
 repo_stats                 # 让模型调用工具（或直接说「统计这个仓库」）
 ```
 

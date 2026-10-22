@@ -224,7 +224,7 @@ exit 0
 ```markdown
 ---
 name: tester
-description: 只写测试、不改实现的子代理
+description: 只写测试、不改实现的subagent
 tools: Read, Grep, Glob, Write
 ---
 你只允许创建或修改 `test/` 下的文件。永远不要修改 `src/`。
@@ -321,7 +321,7 @@ prefix_rule  npm test        -> 允许
 ## C.5 一份可复用的 `.gitignore` 片段
 
 ```gitignore
-# 代理产物
+# agent 产物
 .agent-runs/
 .worktrees/
 tasks.json

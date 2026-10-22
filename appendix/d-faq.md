@@ -38,7 +38,7 @@ Pi 最自由（任意 provider + 本地）。Claude Code 绑定 Claude 系（含
 
 ### 安全
 
-**Q：给代理 `--dangerously-skip-permissions` 安全吗？**
+**Q：给 agent `--dangerously-skip-permissions` 安全吗？**
 只在一次性、无凭证、可销毁的环境里。名字里的 dangerously 不是修辞。
 
 **Q：只读模式真的只读吗？**
@@ -58,7 +58,7 @@ Pi 最自由（任意 provider + 本地）。Claude Code 绑定 Claude 系（含
 **Q：团队里怎么推？**
 从「共享资产」入手：`AGENTS.md`、任务卡、审查技能、验收命令。别一上来就统一工具；先让规范可复用。
 
-**Q：多个人同时让代理改同一个仓库会冲突吗？**
+**Q：多个人同时让 agent 改同一个仓库会冲突吗？**
 会。用分支或 `git worktree` 隔离，或按文件划分任务。见第 12 章。
 
 **Q：怎么审计「它到底做了什么」？**
@@ -89,7 +89,7 @@ Pi 最自由（任意 provider + 本地）。Claude Code 绑定 Claude 系（含
 | 术语 | 含义 | 本书位置 |
 |---|---|---|
 | **agent loop** | 模型 ↔ 工具 的循环：请求 → 工具调用 → 结果 → 再请求 | 1.2 |
-| **run** | 一次完整的代理执行（可能包含多个 turn） | 1.2 |
+| **run** | 一次完整的 agent 执行（可能包含多个 turn） | 1.2 |
 | **turn** | 一次模型请求 + 该请求产生的所有工具调用 | 1.2 |
 | **token** | 模型计费与上下文的最小单位；中文约 1 字 ≈ 1–2 token，代码约 1 行 ≈ 12 token | 1.3 / 10.4 |
 | **context window** | 单次请求能容纳的最大 token 数 | 1.3 |
@@ -109,16 +109,16 @@ Pi 最自由（任意 provider + 本地）。Claude Code 绑定 Claude 系（含
 | **sandbox（沙箱）** | 限制进程能访问的文件/网络/系统调用的机制 | 7.5 |
 | **approval policy** | 何时需要人工确认（Codex） | 7.3 |
 | **permission mode** | Claude Code 的权限档位（plan/acceptEdits/…） | 7.3 |
-| **subagent（子代理）** | 拥有独立上下文的从属代理 | 12 |
+| **subagent（subagent）** | 拥有独立上下文的从属 agent | 12 |
 | **worktree** | git 的多工作树，用于隔离并行改动 | 12.6 |
-| **prompt injection** | 不可信内容里夹带指令，诱导代理做危险操作 | 7.8 |
+| **prompt injection** | 不可信内容里夹带指令，诱导 agent 做危险操作 | 7.8 |
 | **prefix cache（前缀缓存）** | 对重复前缀按低价计费的机制，对消息顺序敏感 | 10.6 |
 | **reasoning effort / thinking** | 模型在回答前生成内部推理的强度档位 | 10.3 |
 | **rollout** | Codex 的会话事件记录文件 | 16.3 |
 | **RPC** | Pi 的 JSONL 双向协议，用于长驻集成 | 5.6 / 13.5 |
 | **SDK** | 进程内嵌入 Pi 的 TypeScript 接口 | 5.7 |
 | **codemode** | 让模型写脚本批量调用工具的模式（Pi / Codex） | 1.4 / 9.2 |
-| **验收标准** | 代理能自己判断「做对了没有」的命令或断言 | 3.2 / 11.0 |
+| **验收标准** | agent 能自己判断「做对了没有」的命令或断言 | 3.2 / 11.0 |
 
 ## D.3 延伸阅读
 

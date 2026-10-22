@@ -33,7 +33,7 @@ MCP（Model Context Protocol）是「工具提供方」和「工具使用方」�
 
 ```mermaid
 sequenceDiagram
-    participant A as 代理（client）
+    participant A as agent（client）
     participant S as MCP server
     A->>S: initialize（协议版本、能力）
     S-->>A: 能力声明
@@ -45,7 +45,7 @@ sequenceDiagram
 
 传输方式两种：
 
-- **stdio**：代理拉起子进程，通过 stdin/stdout 通信。本地工具首选。
+- **stdio**：agent 拉起子进程，通过 stdin/stdout 通信。本地工具首选。
 - **streamable HTTP**：远程服务，支持 OAuth。注意：**旧版 SSE 传输已被主流实现弃用**，Pi 明确拒绝 `sse` 配置。
 
 ### 9.2.1 Pi
@@ -126,7 +126,7 @@ Hook 的价值是**不依赖模型自觉**。三家都支持，但事件名和�
 | 工具调用后 | `tool_result`（可改写结果） | `PostToolUse` | `post_tool_use` |
 | 会话开始/结束 | `session_start` / `session_shutdown` | SessionStart / SessionEnd | `session_start` / `session_end` |
 | 压缩前后 | `turn_end`（可插条目） | PreCompact / PostCompact | `pre_compact` / `post_compact` |
-| 代理结束 | `agent_settled` | Stop / SubagentStop | `interrupt` 等 |
+| agent 结束 | `agent_settled` | Stop / SubagentStop | `interrupt` 等 |
 
 一个「保存后自动格式化」的 Claude Hook：
 

@@ -1,13 +1,13 @@
-# 第 16 章 内部原理：代理循环、协议与会话格式
+# 第 16 章 内部原理：agent loop、协议与会话格式
 
 > 本章你将学会：
-> - 用约 100 行代码实现一个能读文件、跑命令、改代码的最小代理
+> - 用约 100 行代码实现一个能读文件、跑命令、改代码的最小 agent
 > - 看懂三家会话文件的格式与压缩条目的结构
-> - 判断一个「新出的编码代理」在架构上是否靠谱
+> - 判断一个「新出的 coding agent」在架构上是否靠谱
 
-## 16.1 最小可用代理
+## 16.1 最小可用 Agent
 
-去掉 UI、权限、压缩、扩展，代理的内核只有四件事：
+去掉 UI、权限、压缩、扩展，agent 的内核只有四件事：
 
 ```mermaid
 flowchart LR
@@ -107,7 +107,7 @@ async function chat(messages) {
 const messages = [
   {
     role: 'system',
-    content: '你是编码代理。修改文件前先读它；改完运行测试；只做被要求的事；输出简洁。',
+    content: '你是coding agent。修改文件前先读它；改完运行测试；只做被要求的事；输出简洁。',
   },
   { role: 'user', content: process.argv.slice(2).join(' ') || '列出当前目录结构' },
 ];
@@ -243,7 +243,7 @@ Pi 的 RPC 是「JSONL 双向流」，实现时有五个坑：
 事件顺序（一次运行）：
 
 ```text
-agent_start → turn_start → message_start/update/end → turn_start … → turn_end
+Agent_start → turn_start → message_start/update/end → turn_start … → turn_end
             → agent_end → (重试/压缩/排队则再来一轮) → agent_settled
 ```
 
@@ -271,7 +271,7 @@ Pi 额外要求 `content`（给模型）+ `details`（给渲染/状态），并�
 | 权限 | 无审批，靠工具裁剪/容器/扩展门禁 | 模式 + 规则 + Hooks | 沙箱（seatbelt/landlock）+ 审批策略 |
 | 扩展 | 同进程 TS 扩展（工具/命令/UI/provider） | Hooks + 插件 + MCP | Hooks + 插件 + MCP + app-server |
 | 外部接口 | JSON / RPC / TS SDK | print + stream-json | exec + JSON + app-server |
-| 独特实现 | `codemode`（脚本调工具）、树会话 | checkpoint、后台/云会话 | OS 沙箱、多代理、`apply_patch` |
+| 独特实现 | `codemode`（脚本调工具）、树会话 | checkpoint、后台/云会话 | OS 沙箱、多 agent、`apply_patch` |
 
 ## 16.8 如果你要自己做一个
 
@@ -284,9 +284,9 @@ Pi 额外要求 `content`（给模型）+ `details`（给渲染/状态），并�
 5. **上下文裁剪 / 压缩（先粗暴：保留最近 N 条 + 摘要）**（两天）。
 6. **权限：工具白名单 + 命令门禁**（一天）。
 7. **UI 或复用现成 TUI**（取决于你的野心）。
-8. **子代理/并行**（最后做）。
+8. **subagent/并行**（最后做）。
 
-**不要做的事**：一开始就写插件系统、多代理、云端。这三样都是「内核稳定后才有意义」的东西。
+**不要做的事**：一开始就写插件系统、多 agent、云端。这三样都是「内核稳定后才有意义」的东西。
 
 ## 16.9 练习
 

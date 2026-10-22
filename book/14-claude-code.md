@@ -15,7 +15,7 @@ flowchart TB
   A --> E[插件 Plugins<br/>市场 · 命令 · agent · hook · MCP]
   A --> F[Skills]
   A --> G[MCP]
-  A --> H[子代理 --agents / Task]
+  A --> H[subagent --agents / Task]
   A --> I[会话形态]
   I --> I1[交互 TUI]
   I --> I2[-p print]
@@ -28,7 +28,7 @@ flowchart TB
   J --> J3[Desktop]
 ```
 
-一句话概括：**Claude Code 把「代理 + 权限 + 生命周期 + 云」做成了一体化产品**。好处是开箱即用，代价是配置面比较大。
+一句话概括：**Claude Code 把「agent + 权限 + 生命周期 + 云」做成了一体化产品**。好处是开箱即用，代价是配置面比较大。
 
 ## 14.2 权限：三件套
 
@@ -50,7 +50,7 @@ claude --allowedTools "Read" "Grep" "Edit" "Bash(npm test:*)" "Bash(git diff:*)"
 claude --disallowedTools "Bash(git push:*)" "Read(./.env*)"
 ```
 
-规则是**模式匹配**，不是沙箱。它挡住的是「代理主动想做的事」，挡不住「你让它做的事」和「它想出来的新花样」。所以关键拦截要靠 hooks。
+规则是**模式匹配**，不是沙箱。它挡住的是「agent 主动想做的事」，挡不住「你让它做的事」和「它想出来的新花样」。所以关键拦截要靠 hooks。
 
 ### 14.2.3 Hooks（确定性）
 
@@ -92,9 +92,9 @@ Claude Code 的 checkpoint 记录文件状态，`/rewind` 可以回到某个历�
 
 | 时机 | 动作 |
 |---|---|
-| 让代理做大改之前 | 先 `/compact` 简化上下文，再开始（回滚点更清晰） |
-| 代理第一次「跑偏」 | `Esc` 打断 → `/rewind` 回到上一个干净点 |
-| 实验性方案 | 先提交一次 git，再让代理放开改 |
+| 让 agent 做大改之前 | 先 `/compact` 简化上下文，再开始（回滚点更清晰） |
+| agent 第一次「跑偏」 | `Esc` 打断 → `/rewind` 回到上一个干净点 |
+| 实验性方案 | 先提交一次 git，再让 agent 放开改 |
 | 长会话后期 | 用 `/status` 确认当前会话与 checkpoint 状态 |
 
 **与 git 的分工**：checkpoint 适合「会话内的快速试探」，git 适合「跨会话的正式记录」。两者都用，不要用 checkpoint 替代提交。
@@ -180,7 +180,7 @@ claude -p \
 | `--safe-mode` | 关闭所有自定义（插件、MCP、hooks、主题…），排查「是不是配置把工具搞坏了」 |
 | `--restricted` | 移除执行类工具、限制文件访问范围，用于受限环境 |
 
-## 14.7 子代理
+## 14.7 subagent
 
 定义方式两种：
 
@@ -200,11 +200,11 @@ tools: Read, Grep, Glob
 你只审查，不修改。每条问题必须给文件:行号与触发条件。
 ```
 
-主代理通过 `Task` 工具调用子代理。要点：
+主 agent 通过 `Task` 工具调用 subagent。要点：
 
-- **子代理有独立上下文**：主代理只收到摘要，能显著延缓压缩。
-- **限定 `tools`**：只读子代理就不要给 `Edit`。
-- **子代理也会烧钱**：每个都要重发系统提示。
+- **subagent 有独立上下文**：主 agent 只收到摘要，能显著延缓压缩。
+- **限定 `tools`**：只读 subagent 就不要给 `Edit`。
+- **subagent 也会烧钱**：每个都要重发系统提示。
 
 ## 14.8 技巧与坑
 
@@ -221,9 +221,9 @@ tools: Read, Grep, Glob
 1. 用 `plan` 模式做一次完整的需求分析，再切 `acceptEdits` 执行，比较两种模式的产物差异。
 2. 写一个 `PreToolUse` hook：禁止 `Write` 到 `src/generated/`，并用一条命令验证。
 3. 起一个后台会话改写文档，同时在前台做别的事，最后合并。
-4. 用 `--json-schema` 让代理输出结构化审查结果，接进一个 20 行的汇总脚本。
+4. 用 `--json-schema` 让 agent 输出结构化审查结果，接进一个 20 行的汇总脚本。
 5. 用 `--safe-mode` 复现一次「插件导致的异常」，定位到具体插件。
 
 ---
 
-下一章：Codex —— 沙箱与多代理是它的骨架。
+下一章：Codex —— 沙箱与多 agent 是它的骨架。

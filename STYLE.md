@@ -3,6 +3,7 @@
 ## 语言与语气
 
 - 简体中文，技术名词保留英文原形（agent、token、prompt、tool call、sandbox）。
+- 「agent」不翻译：不要写成「代理」「智能体」，正文小写、标题可大写。
 - 第二人称「你」，避免「笔者」「我们觉得」这类空话；结论先行，再解释原因。
 - 不写营销词（革命性、颠覆），写可验证的事实和边界条件。
 
@@ -53,7 +54,9 @@
 | Pi | pi（指产品时）、PI |
 | Claude Code | claude code、CC |
 | Codex | codex（指产品时） |
-| agent loop | 智能体循环、Agent Loop |
+| agent | **不翻译**：正文小写 agent，标题可写 Agent；不用「代理」「智能体」 |
+| coding agent | 同上，不译作「编码代理」 |
+| agent loop | 不译作「智能体循环」 |
 | tool call | 工具调用（正文可用，首次出现标注英文） |
 | context window | 上下文窗口 |
 | compaction | 压缩（首次出现：压缩 compaction） |
