@@ -1,0 +1,34 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
+      "description": "只读浏览当前项目文件",
+      "exposure": "codemode",
+      "timeout": 30
+    },
+    "git": {
+      "command": "uvx",
+      "args": ["mcp-server-git", "--repository", "."],
+      "description": "读取 git 历史与 diff",
+      "exposure": "deferred",
+      "toolExposure": {
+        "git_log": "direct",
+        "git_diff": "direct",
+        "git_commit": "hidden"
+      }
+    },
+    "sentry": {
+      "url": "https://mcp.sentry.dev/mcp",
+      "description": "查询 Sentry 错误与 issue",
+      "oauth": true,
+      "enabled": false
+    },
+    "internal-docs": {
+      "url": "https://docs.internal.example.com/mcp",
+      "headers": { "Authorization": "Bearer ${DOCS_TOKEN}" },
+      "description": "内部文档搜索",
+      "exposure": "codemode"
+    }
+  }
+}

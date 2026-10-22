@@ -1,0 +1,356 @@
+:root {
+  --bg: #fbfaf7;
+  --panel: #f4f1ea;
+  --ink: #1f2328;
+  --ink-soft: #5b6470;
+  --line: #e2ddd2;
+  --accent: #b4532a;
+  --accent-soft: #f3e4da;
+  --code-bg: #f0ece3;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161719;
+    --panel: #1c1e21;
+    --ink: #e6e3dc;
+    --ink-soft: #9aa3ad;
+    --line: #2c2f33;
+    --accent: #e08a5f;
+    --accent-soft: #2a211c;
+    --code-bg: #202327;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.75 var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.layout { display: flex; min-height: 100vh; }
+
+/* ---------------- 侧栏 ---------------- */
+
+.sidebar {
+  width: 300px;
+  flex: 0 0 300px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+}
+
+.sidebar-head { padding: 22px 20px 12px; border-bottom: 1px solid var(--line); }
+.brand { font-size: 17px; font-weight: 700; letter-spacing: .01em; }
+.brand-sub { font-family: var(--mono); font-size: 11.5px; color: var(--accent); margin-top: 4px; }
+.meta { font-size: 11.5px; color: var(--ink-soft); margin-top: 8px; }
+
+.search {
+  width: 100%;
+  margin-top: 14px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 13px var(--sans);
+}
+.search:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+.toc { list-style: none; margin: 0; padding: 12px 8px 24px; font-size: 13.5px; }
+.toc a { border-bottom: 0; }
+.toc-chapter > a {
+  display: block;
+  padding: 7px 10px;
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 5px;
+}
+.toc-chapter > a:hover { background: var(--accent-soft); }
+.toc-chapter > ul { list-style: none; margin: 0 0 8px; padding: 0 0 0 10px; }
+.toc-chapter > ul li a {
+  display: block;
+  padding: 3.5px 10px 3.5px 12px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.toc-chapter > ul li a:hover { color: var(--ink); }
+.toc a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
+
+.sidebar-foot {
+  margin-top: auto;
+  padding: 12px 20px;
+  border-top: 1px solid var(--line);
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+.kbd {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 1px 5px;
+  background: var(--bg);
+}
+
+/* ---------------- 正文 ---------------- */
+
+.content { flex: 1; min-width: 0; }
+
+.topbar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  padding: 0 28px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  z-index: 10;
+}
+.crumb { font-size: 12.5px; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.progress { margin-left: auto; width: 120px; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+#bar { height: 100%; width: 0; background: var(--accent); transition: width .1s linear; }
+.menu-btn { display: none; background: none; border: 1px solid var(--line); border-radius: 5px; color: var(--ink); font-size: 15px; padding: 2px 8px; }
+
+article {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 36px 32px 80px;
+}
+
+/* README 作为封面页时的样式 */
+section[data-file="README.md"] h1 {
+  font-size: 40px;
+  line-height: 1.2;
+  letter-spacing: -.02em;
+  margin: 12px 0 8px;
+}
+section[data-file="README.md"] h1 + p { font-size: 18px; color: var(--ink-soft); }
+
+h1, h2, h3, h4 { line-height: 1.35; font-weight: 700; }
+h1 { font-size: 30px; margin: 64px 0 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+h1:first-child { margin-top: 0; border-top: 0; padding-top: 0; }
+
+/* 章节之间留出明显的分隔 */
+section + section { margin-top: 64px; border-top: 1px solid var(--line); padding-top: 8px; }
+h2 { font-size: 22px; margin: 40px 0 12px; }
+h3 { font-size: 17.5px; margin: 28px 0 8px; }
+h4 { font-size: 15.5px; margin: 22px 0 6px; color: var(--ink-soft); }
+
+p { margin: 0 0 14px; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+li > ul, li > ol { margin: 4px 0; }
+strong { font-weight: 650; }
+del { color: var(--ink-soft); }
+
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); }
+a:hover { border-bottom-color: var(--accent); }
+
+hr { border: 0; border-top: 1px solid var(--line); margin: 40px 0; }
+
+blockquote, .quote {
+  margin: 18px 0;
+  padding: 2px 18px;
+  border-left: 3px solid var(--line);
+  color: var(--ink-soft);
+}
+blockquote p:last-child { margin-bottom: 0; }
+
+/* callout */
+.callout { margin: 20px 0; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); }
+.callout p { margin: 0 0 8px; }
+.callout p:last-child { margin-bottom: 0; }
+.callout-note { border-left: 4px solid #4a7fb5; }
+.callout-tip { border-left: 4px solid #3f8a5c; }
+.callout-warning, .callout-caution { border-left: 4px solid #c05621; }
+.callout-important { border-left: 4px solid #8a4fbd; }
+
+/* 代码 */
+code {
+  font-family: var(--mono);
+  font-size: .88em;
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+pre {
+  position: relative;
+  margin: 18px 0;
+  padding: 16px 18px;
+  background: var(--code-bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13.2px;
+  line-height: 1.62;
+}
+pre code { background: none; border: 0; padding: 0; white-space: pre; font-size: inherit; }
+pre[data-lang]::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  opacity: .7;
+}
+pre.ascii { background: var(--panel); }
+pre.ascii code { font-size: 12.4px; }
+
+/* 表格 */
+.table-wrap {
+  overflow-x: auto;
+  margin: 20px 0;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.table-wrap::-webkit-scrollbar { height: 8px; }
+.table-wrap::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+.table-wrap::-webkit-scrollbar-track { background: transparent; }
+table { border-collapse: collapse; width: 100%; font-size: 13.8px; }
+th, td { padding: 8px 12px; border: 1px solid var(--line); vertical-align: top; text-align: left; }
+th { background: var(--panel); font-weight: 650; white-space: nowrap; }
+/* 首列通常是短标签，避免被挤成逐字换行 */
+tbody td:first-child, thead th:first-child { white-space: nowrap; }
+/* 单元格里的长命令允许折行，避免整表被撑出容器 */
+td code, td { overflow-wrap: anywhere; }
+td code { white-space: pre-wrap; }
+tbody tr:nth-child(even) { background: color-mix(in srgb, var(--panel) 45%, transparent); }
+
+/* 图片与 Mermaid */
+img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--line); }
+.mermaid {
+  margin: 22px 0;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: center;
+  overflow-x: auto;
+  /* 未渲染时按源码展示，保证离线也可读 */
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  white-space: pre;
+  text-align: left;
+  color: var(--ink-soft);
+}
+.mermaid::before {
+  content: "Mermaid 图 · 源码";
+  display: block;
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: .04em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.mermaid[data-rendered] {
+  font-family: var(--sans);
+  white-space: normal;
+  text-align: center;
+  color: var(--ink);
+}
+.mermaid[data-rendered]::before { content: none; }
+.mermaid svg { max-width: 100%; height: auto; background: transparent; }
+.mermaid[data-rendered] { background: color-mix(in srgb, var(--panel) 70%, var(--bg)); }
+.mermaid-fallback {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-align: left;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--ink-soft);
+}
+.mermaid-fallback::before {
+  content: "Mermaid 源码（离线未渲染）";
+  display: block;
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+/* 任务列表复选框 */
+li input[type="checkbox"] { margin-right: 6px; vertical-align: 1px; accent-color: var(--accent); }
+
+.page-foot { max-width: 860px; margin: 0 auto; padding: 20px 32px 60px; color: var(--ink-soft); font-size: 12.5px; }
+
+/* 响应式 */
+@media (max-width: 960px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    transition: transform .2s ease;
+    width: 84vw;
+    flex-basis: auto;
+    box-shadow: 0 0 40px rgba(0, 0, 0, .25);
+  }
+  body.nav-open .sidebar { transform: none; }
+  .menu-btn { display: inline-block; }
+  article { padding: 26px 20px 60px; }
+  .topbar { padding: 0 16px; }
+  h1 { font-size: 25px; }
+  section[data-file="README.md"] h1 { font-size: 30px; }
+}
+
+/* 打印 / 导出 PDF：A4 + 强制浅色，避免整本深色背景 */
+@page {
+  size: A4;
+  margin: 18mm 16mm 20mm;
+}
+
+@media print {
+  :root {
+    --bg: #ffffff;
+    --panel: #f7f6f3;
+    --ink: #14171a;
+    --ink-soft: #555d66;
+    --line: #d9d4c9;
+    --accent: #8f3f1d;
+    --accent-soft: #f6ece5;
+    --code-bg: #f5f3ee;
+  }
+  body { background: #fff; color: #14171a; }
+  .mermaid { background: #fff; }
+  section + section { border-top: 0; margin-top: 0; }
+  .sidebar, .topbar, .page-foot { display: none; }
+  .layout { display: block; }
+  article { max-width: none; padding: 0; }
+  h1 { page-break-before: always; }
+  h2, h3 { page-break-after: avoid; }
+  pre, table, .mermaid { page-break-inside: avoid; }
+  a { color: inherit; border: 0; }
+  body { font-size: 11pt; }
+}

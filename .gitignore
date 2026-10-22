@@ -1,0 +1,7 @@
+dist/
+node_modules/
+.DS_Store
+.agent-runs/
+.worktrees/
+tasks.json
+pi-debug.log

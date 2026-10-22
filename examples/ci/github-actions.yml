@@ -1,0 +1,71 @@
+# 在 CI 里使用三种代理的三种典型姿势
+# 关键点：非交互、只读或受限沙箱、结构化输出、失败即退出
+name: ai-checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # 1) Pi：读-only 审查，输出 JSON 供后续步骤/评论使用
+  pi-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: curl -fsSL https://pi.dev/install.sh | sh
+      - name: Review diff
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          git diff origin/${{ github.base_ref }}...HEAD > pr.diff
+          pi --print \
+             --no-session \
+             --tools read,bash,grep,find,ls \
+             --model anthropic/claude-sonnet-4-5 \
+             "读 pr.diff，按 P0/P1/P2 输出问题清单；没有把握的写待确认" \
+             > review.md
+      - uses: actions/upload-artifact@v4
+        with: { name: pi-review, path: review.md }
+
+  # 2) Claude Code：跑测试并给出修复建议（限制轮数，避免烧钱）
+  claude-fix:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - name: Ask Claude to fix failing tests
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p --output-format json --permission-mode acceptEdits \
+            --max-budget-usd 2 \
+            "运行 npm test，修复失败项。只改必要文件，不要动测试断言" > result.json
+      - run: git diff --stat
+
+  # 3) Codex：强沙箱批处理，只允许写工作区
+  codex-batch:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - name: Codex exec
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          codex exec \
+            --sandbox workspace-write \
+            -c approval_policy="never" \
+            --json \
+            -o last-message.txt \
+            "跑 npm test；失败则修到通过；不要改 package-lock.json"
+      - run: cat last-message.txt

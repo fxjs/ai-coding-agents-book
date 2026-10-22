@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 编码代理实战：Pi、Claude Code 与 Codex</title>
+<meta name="description" content="面向软件开发者的 AI 编码代理实战指南，覆盖安装、交互、自动化、上下文工程、扩展、多代理与内部原理。">
+<style>{{CSS}}</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <header class="sidebar-head">
+      <div class="brand">AI 编码代理实战</div>
+      <div class="brand-sub">Pi · Claude Code · Codex</div>
+      <div class="meta">{{CHAPTERS}} 篇 · {{WORDS}} 字 · {{DATE}}</div>
+      <input id="search" class="search" type="search" placeholder="搜索章名 / 小节…" autocomplete="off">
+    </header>
+    <nav>
+      <ul class="toc">
+{{TOC}}
+      </ul>
+    </nav>
+    <footer class="sidebar-foot">
+      <span class="kbd">/</span> 搜索 · <span class="kbd">Esc</span> 清空
+    </footer>
+  </aside>
+
+  <main class="content" id="content">
+    <div class="topbar">
+      <button id="menu" class="menu-btn" aria-label="目录">☰</button>
+      <div class="crumb" id="crumb">正文</div>
+      <div class="progress"><div id="bar"></div></div>
+    </div>
+    <article>
+{{CONTENT}}
+    </article>
+    <footer class="page-foot">
+      本书示例代码位于 <code>examples/</code>，命令对照见附录 A。版本基准见首页。
+    </footer>
+  </main>
+</div>
+
+<script type="module">
+  const nodes = [...document.querySelectorAll('.mermaid')];
+  let rendered = false;
+  try {
+    const mermaid = (await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs')).default;
+    const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: dark ? 'dark' : 'neutral',
+      securityLevel: 'loose',
+      themeVariables: { background: 'transparent' },
+    });
+    await mermaid.run({ nodes });
+    rendered = true;
+    nodes.forEach((n) => n.setAttribute('data-rendered', '1'));
+  } catch (err) {
+    console.warn('Mermaid 未渲染：', err);
+  }
+  // 深链接：Mermaid 渲染会改变布局高度，渲染完成后重新对齐锚点
+  if (location.hash) {
+    const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (target) requestAnimationFrame(() => target.scrollIntoView({ block: 'start' }));
+  }
+
+  if (!rendered || nodes.some((n) => !n.querySelector('svg'))) {
+    nodes.forEach((n) => {
+      if (!n.querySelector('svg')) n.classList.add('mermaid-fallback');
+    });
+  }
+</script>
+
+<script>
+  // 目录搜索
+  const search = document.getElementById('search');
+  const chapters = [...document.querySelectorAll('.toc-chapter')];
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    for (const ch of chapters) {
+      let any = false;
+      const self = ch.dataset.search.includes(q);
+      ch.style.display = self || !q ? '' : 'none';
+      for (const li of ch.querySelectorAll('li')) {
+        const hit = li.dataset.search.includes(q);
+        li.style.display = !q || hit || self ? '' : 'none';
+        any = any || hit;
+      }
+      if (q && !self && !any) ch.style.display = 'none';
+      const sub = ch.querySelector('ul');
+      if (sub) sub.style.display = q && !self && !any ? 'none' : '';
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== search) { e.preventDefault(); search.focus(); }
+    if (e.key === 'Escape' && document.activeElement === search) { search.value = ''; search.dispatchEvent(new Event('input')); search.blur(); }
+  });
+
+  // 阅读进度
+  const bar = document.getElementById('bar');
+  addEventListener('scroll', () => {
+    const h = document.documentElement;
+    bar.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+  }, { passive: true });
+
+  // 手机端目录
+  document.getElementById('menu').addEventListener('click', () => document.body.classList.toggle('nav-open'));
+  document.querySelectorAll('.toc a').forEach((a) => a.addEventListener('click', () => document.body.classList.remove('nav-open')));
+
+  // 当前小节高亮（按滚动位置取最后一个越过顶部的标题）
+  const links = [...document.querySelectorAll('.toc a')];
+  const map = new Map(links.map((a) => [a.getAttribute('href').slice(1), a]));
+  const crumb = document.getElementById('crumb');
+  const heads = [...document.querySelectorAll('article h1, article h2')];
+  const nav = document.querySelector('.sidebar');
+  let ticking = false;
+
+  function syncActive() {
+    ticking = false;
+    const y = window.scrollY + Math.min(280, window.innerHeight * 0.35);
+    let current = heads[0];
+    for (const h of heads) {
+      if (h.offsetTop <= y) current = h;
+      else break;
+    }
+    if (!current) return;
+    const a = map.get(current.id);
+    if (!a) return;
+    if (a.classList.contains('active')) return;
+    links.forEach((l) => l.classList.remove('active'));
+    a.classList.add('active');
+    crumb.textContent = a.textContent;
+
+    // 只滚动侧栏本身，绝不干扰正文滚动
+    const r = a.getBoundingClientRect();
+    const nr = nav.getBoundingClientRect();
+    if (r.top < nr.top + 90 || r.bottom > nr.bottom - 40) {
+      nav.scrollTop += r.top - nr.top - nr.height / 3;
+    }
+  }
+
+  addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(syncActive); }
+  }, { passive: true });
+  syncActive();
+</script>
+</body>
+</html>
