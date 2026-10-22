@@ -46,6 +46,14 @@ const SOURCES = [
 
 const CHECK_ONLY = process.argv.includes('--check');
 
+/** 每个源文件对应的章节锚点（h1 用文件名 slug） */
+const FILE_ANCHOR = new Map(
+  SOURCES.map((f) => [f, slugify(path.basename(f, '.md'))]),
+);
+
+/** 解析相对链接时所在的源文件；由 parseMarkdown 设置 */
+let currentFile = '';
+
 // ---------------------------------------------------------------- 工具函数
 
 const esc = (s) =>
@@ -74,9 +82,10 @@ function inline(text) {
         `<img src="${src}" alt="${alt}"${title ? ` title="${title}"` : ''} loading="lazy">`)
     .replace(/\[([^\]]+)\]\(([^)\s]+)(?:\s+"([^"]*)")?\)/g,
       (_, label, href, title) => {
-        const external = /^https?:/.test(href);
+        const resolved = resolveHref(href);
+        const external = /^https?:/.test(resolved);
         const attrs = external ? ' target="_blank" rel="noopener"' : '';
-        return `<a href="${href}"${title ? ` title="${title}"` : ''}${attrs}>${label}</a>`;
+        return `<a href="${resolved}"${title ? ` title="${title}"` : ''}${attrs}>${label}</a>`;
       })
     /** 支持 **粗**、*斜*、~~删~~ */
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
@@ -129,6 +138,22 @@ function renderQuoteBody(lines) {
   return out.join('');
 }
 
+/**
+ * 把指向 .md 源文件的相对链接改写成页内锚点。
+ * 这样 dist/ 作为静态站点单独部署时，README 的章节目录与交叉引用不会 404。
+ */
+function resolveHref(href) {
+  if (/^(https?:|mailto:|#|\/)/.test(href)) return href;
+  const [p, anchor] = href.split('#');
+  if (!p) return href;
+
+  const target = path.posix.normalize(path.posix.join(path.posix.dirname(currentFile), p));
+  if (p.endsWith('.md') && FILE_ANCHOR.has(target)) {
+    return `#${anchor || FILE_ANCHOR.get(target)}`;
+  }
+  return href;
+}
+
 function splitRow(line) {
   const inner = line.trim().replace(/^\|/, '').replace(/\|$/, '');
   const cells = [];
@@ -146,6 +171,7 @@ function splitRow(line) {
 // ---------------------------------------------------------------- 块级解析
 
 function parseMarkdown(md, sourceFile) {
+  currentFile = sourceFile;
   const lines = md.replace(/\r\n?/g, '\n').split('\n');
   const html = [];
   const headings = [];
@@ -364,6 +390,14 @@ function main() {
   }
 
   const problems = checkLinks(all, headings);
+  // 页内锚点校验：改写后的 href="#..." 必须存在对应 id
+  const idSet = new Set(headings.map((h) => h.id));
+  for (const sec of sections) {
+    for (const m of sec.html.matchAll(/href="#([^"]+)"/g)) {
+      const id = decodeURIComponent(m[1]);
+      if (!idSet.has(id)) problems.push(`${sec.file}: 页内锚点不存在 #${id}`);
+    }
+  }
   if (problems.length) {
     console.error('链接校验失败：');
     for (const p of problems) console.error('  - ' + p);

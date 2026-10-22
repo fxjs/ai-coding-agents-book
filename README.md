@@ -97,6 +97,7 @@ npm run build      # 生成 dist/index.html 与 dist/book.md
 npm run verify     # check + build
 npm run pdf        # 用本机 Chrome 导出 dist/book.pdf（A4，浅色打印样式）
 npm run test:examples   # 跑 examples/task-cli 的 8 个测试
+npm run serve           # 静态托管 dist/（http://127.0.0.1:8080）
 ```
 
 构建脚本零依赖：自带 Markdown 子集解析器；Mermaid 图联网时渲染，离线时回退为源码块。
@@ -109,7 +110,8 @@ npm run test:examples   # 跑 examples/task-cli 的 8 个测试
   `↑`/`↓` 选择，`Enter` 跳转，`Esc` 清空。命中词会在**正文中全部高亮**，`F3` / `Shift+F3`
   在命中处之间前后跳转（显示「第 n/m 处」）。也支持 `?q=关键词` 直接带查询打开。
 - **目录联动**：侧栏随滚动高亮当前小节，`Ctrl+Shift+F`（浏览器内）可搜索页面。
-- **单文件**：`dist/index.html` 自包含（CSS/JS/索引都在里面），双击即可离线阅读。
+- **单文件、可独立部署**：`dist/index.html` 自包含（CSS/JS/索引都在里面），双击即可离线阅读；
+  章节互链在构建时已改写成页内锚点（`book/*.md` → `#锚点`），所以把 `dist/` 丢给任意静态服务器也不会 404。
 
 ## 排版约定
 

@@ -9,7 +9,8 @@
     "check": "node build/check.mjs",
     "verify": "npm run check && npm run build",
     "test:examples": "cd examples/task-cli && node --test",
-    "pdf": "bash build/pdf.sh"
+    "pdf": "bash build/pdf.sh",
+    "serve": "python3 -m http.server 8080 -d dist"
   },
   "license": "CC-BY-NC-4.0"
 }
