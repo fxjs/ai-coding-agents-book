@@ -24,7 +24,7 @@
       </ul>
     </nav>
     <footer class="sidebar-foot">
-      <span class="kbd">/</span> 搜索 · <span class="kbd">Esc</span> 清空
+      <span class="kbd">/</span> 或 <span class="kbd">⌘K</span> 搜索 · <span class="kbd">Esc</span> 清空
     </footer>
   </aside>
 
@@ -194,8 +194,12 @@
       </button>`;
     }).join('');
 
-    results.innerHTML = `<div class="search-status"><span>${hits.length}${hits.length === 40 ? '+' : ''} 条结果</span>
-      <span>↑↓ 选择 · Enter 跳转 · Esc 清除</span></div>${list}`;
+    results.innerHTML = `<div class="search-status">
+      <span>${hits.length}${hits.length === 40 ? '+' : ''} 条结果</span>
+      <span class="search-hint">↑↓ 选择 · Enter 跳转 · Esc 清除</span>
+      <button type="button" class="search-clear" title="清空搜索（Esc）">×</button>
+    </div>${list}`;
+    results.querySelector('.search-clear').addEventListener('click', resetSearch);
 
     results.querySelectorAll('.hit').forEach((btn) => {
       btn.addEventListener('click', () => jump(Number(btn.dataset.i)));
@@ -210,8 +214,13 @@
     void hit.el.offsetWidth;
     hit.el.classList.add('flash');
     setTimeout(() => hit.el.classList.remove('flash'), 2200);
-    // 记住位置，方便 Esc 后回看
-    if (hit.el.id) history.replaceState(null, '', '#' + hit.el.id);
+    // 记住位置（file:// 的 origin 为 null，replaceState 可能抛错，忽略即可）
+    try {
+      if (hit.el.id) history.replaceState(null, '', '#' + hit.el.id);
+    } catch {}
+    if (currentQuery) {
+      try { history.replaceState(null, '', '?q=' + encodeURIComponent(currentQuery) + (hit.el.id ? '#' + hit.el.id : '')); } catch {}
+    }
   }
 
   function moveCursor(delta) {
@@ -255,13 +264,21 @@
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === '/' && document.activeElement !== search && !e.target.closest('input, textarea')) {
+    const typing = e.target.closest('input, textarea, [contenteditable]');
+    if ((e.key === '/' && !typing) || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) {
       e.preventDefault(); search.focus(); search.select();
     }
     if (e.key === 'Escape' && document.activeElement === search) resetSearch();
   });
 
   buildIndex();
+
+  // 支持 ?q=关键词 直接带查询打开（便于分享定位）
+  const initial = new URLSearchParams(location.search).get('q');
+  if (initial) {
+    search.value = initial;
+    renderHits(initial);
+  }
 
   // 阅读进度
   const bar = document.getElementById('bar');
