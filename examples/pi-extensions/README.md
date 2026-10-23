@@ -31,7 +31,11 @@ tsc -p tsconfig.json
 repo_stats                 # 让模型调用工具（或直接说「统计这个仓库」）
 ```
 
-`node_modules` 是本机 Pi 安装目录的软链，仅用于类型检查，已被 `.gitignore` 忽略。
+`node_modules` 只是指向本机 Pi 安装目录的软链，仅用于类型检查，不提交到仓库。需要时自行创建（版本号按实际安装替换）：
+
+```bash
+ln -s ~/.pi/agent/install/releases/1.4.0/node_modules node_modules
+```
 
 ## 设计说明
 
