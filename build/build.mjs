@@ -42,6 +42,7 @@ const SOURCES = [
   'appendix/b-keybindings.md',
   'appendix/c-configs.md',
   'appendix/d-faq.md',
+  'appendix/e-omp.md',
 ];
 
 const CHECK_ONLY = process.argv.includes('--check');

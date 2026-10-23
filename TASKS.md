@@ -45,6 +45,7 @@
 - [x] T35 `examples/pi-extensions` 可加载扩展 + tsconfig + 类型检查通过
 - [x] T36 `examples/skills`、`examples/prompts`、`examples/mcp`、`examples/ci`
 - [x] T37 `examples/ci/pi-stream.mjs`、`parallel-worktrees.sh`、`github-actions.yml`
+- [x] T38 `appendix/e-omp.md` omp 实战手册（安装、CLI、TUI、斜杠命令、工具面、子 agent、扩展、自动化与安全）
 
 ## 阶段四：构建与校验
 
@@ -65,17 +66,17 @@
 
 | 项 | 结果 |
 |---|---|
-| 文件数 | 23（README + 17 章 + 4 附录 + 1 规范） |
-| 正文字数 | 34,300 汉字（约 44,000 词/字，含代码与符号） |
-| 表格 | 250+ |
-| Mermaid 图 | 30 |
-| 代码块 | 130+ |
-| PDF | 170 页（A4，`npm run pdf`） |
+| 文件数 | 24（README + 17 章 + 5 附录 + 1 规范） |
+| 正文字数 | 55,764 词/字（构建统计，含代码与符号） |
+| 表格 | 136 |
+| Mermaid 图 | 32 |
+| 代码块 | 253 |
+| PDF | 未重跑（新增附录 E 后需重新导出） |
 | 链接校验 | 通过 |
 | 编号校验 | 通过 |
 | `examples/task-cli` | 8 tests passed |
 | `examples/pi-extensions` | `tsc -p tsconfig.json` 无错误 |
-| 构建产物 | `dist/index.html`（约 330 KB）、`dist/book.md`、`dist/book.pdf` |
+| 构建产物 | `dist/index.html`（约 445 KB）、`dist/book.md` |
 
 ## 约定
 

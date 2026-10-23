@@ -7,6 +7,9 @@
 **Q：三个工具能同时装在一台机器上吗？会互相干扰吗？**
 能。它们各自独立（`~/.pi`、`~/.claude`、`~/.codex`）。唯一会互相影响的是环境变量：`ANTHROPIC_API_KEY` 同时被 Pi 与 Claude 读取；Bedrock/Vertex 相关变量也会影响 Pi 的 provider 选择。
 
+**Q：omp 和 Pi 是什么关系？**
+omp 是 Pi 的 fork，配置根从 `.pi` 换成 `.omp`，默认内置 LSP、DAP、subagent 与权限层。它不读取 `.pi` 下的配置；迁移步骤见附录 E。
+
 **Q：必须用某个特定模型吗？**
 Pi 最自由（任意 provider + 本地）。Claude Code 绑定 Claude 系（含 Bedrock/Vertex）。Codex 绑定 OpenAI 系（含 OSS 本地）。跨系使用需要兼容网关。
 
