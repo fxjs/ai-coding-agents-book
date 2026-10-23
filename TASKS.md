@@ -46,6 +46,7 @@
 - [x] T36 `examples/skills`、`examples/prompts`、`examples/mcp`、`examples/ci`
 - [x] T37 `examples/ci/pi-stream.mjs`、`parallel-worktrees.sh`、`github-actions.yml`
 - [x] T38 `appendix/e-omp.md` omp 实战手册（安装、CLI、TUI、斜杠命令、工具面、子 agent、扩展、自动化与安全）
+- [x] T39 GitHub Pages 自动部署（push 到 `main` 构建 `dist/` 并发布）
 
 ## 阶段四：构建与校验
 
@@ -67,12 +68,13 @@
 | 项 | 结果 |
 |---|---|
 | 文件数 | 24（README + 17 章 + 5 附录 + 1 规范） |
-| 正文字数 | 55,764 词/字（构建统计，含代码与符号） |
+| 正文字数 | 55,776 词/字（构建统计，含代码与符号） |
 | 表格 | 136 |
 | Mermaid 图 | 32 |
 | 代码块 | 253 |
 | PDF | 未重跑（新增附录 E 后需重新导出） |
 | 链接校验 | 通过 |
+| 在线阅读 | <https://fxjs.github.io/ai-coding-agents-book/> |
 | 编号校验 | 通过 |
 | `examples/task-cli` | 8 tests passed |
 | `examples/pi-extensions` | `tsc -p tsconfig.json` 无错误 |
