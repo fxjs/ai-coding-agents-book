@@ -4,6 +4,8 @@
 
 一本写给软件开发者、能照着敲、也能读懂原理的书。
 
+**在线阅读：** <https://fxjs.github.io/ai-coding-agents-book/>
+
 > 基准版本：Pi `1.4.0` · Claude Code `2.1.303` · Codex CLI `0.163.0`
 > 命令细节以 `--help` 与交互内 `/` 菜单为准；版本敏感处已标注。
 
