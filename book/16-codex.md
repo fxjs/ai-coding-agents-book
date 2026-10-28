@@ -1,11 +1,11 @@
-# 第 15 章 工具专章：Codex
+# 第 16 章 工具专章：Codex
 
 > 本章你将学会：
 > - 把沙箱与审批理解成两个正交维度，组合出你需要的档位
 > - 用 `exec / review / apply / queue / worktree` 把 Codex 变成流水线组件
 > - 判断「无人值守」在什么条件下才是真的安全
 
-## 15.1 生态地图
+## 16.1 生态地图
 
 ```mermaid
 flowchart TB
@@ -20,7 +20,7 @@ flowchart TB
 
 Codex 的设计主线是**「先保证不闯祸，再谈效率」**。所以你会在它的命令列表里看到大量与执行控制相关的项（`sandbox`、`approve`、`doctor`、`features`），而 TUI 装饰类命令（`/pet`、`/theme`）反而更像附加品。
 
-## 15.2 沙箱：两个维度，不是一个开关
+## 16.2 沙箱：两个维度，不是一个开关
 
 ```mermaid
 flowchart LR
@@ -43,7 +43,7 @@ flowchart LR
 | CI 修复 | `-s workspace-write -a never` | 出不了圈，靠 diff 兜底 |
 | 一次性容器 | `--dangerously-bypass-approvals-and-sandbox` | 只在可销毁环境 |
 
-### 15.2.1 底层实现
+### 16.2.1 底层实现
 
 | 平台 | 机制 |
 |---|---|
@@ -53,7 +53,7 @@ flowchart LR
 
 关键点：**这是内核级强制，不依赖模型配合**。所以即使模型「想」去读 `~/.ssh`，也会拿到 `Permission denied`。这是它相对「规则匹配」的根本区别。
 
-### 15.2.2 可写范围与网络
+### 16.2.2 可写范围与网络
 
 ```toml
 sandbox_mode = "workspace-write"
@@ -67,7 +67,7 @@ writable_roots = ["."]
 - `network_access = false`：断网。需要查文档时再放开，或用白名单。
 - 被拒时的排查：让它把错误原样贴出来，通常是路径不在 roots 里，而不是工具坏了。
 
-## 15.3 审批：从「问人」到「自动审查」
+## 16.3 审批：从「问人」到「自动审查」
 
 除了 `on-request` / `never`，Codex 还提供了一个中间态：
 
@@ -79,7 +79,7 @@ codex --approve-for-me            # 用 workspace-write 沙箱 + 自动审查代
 
 交互内还有 `/approve`（批准一次被自动审查拒绝的重试）——这是把「误杀」救回来的出口。
 
-## 15.4 配置：profile + 逐项覆盖
+## 16.4 配置：profile + 逐项覆盖
 
 ```toml
 # ~/.codex/config.toml
@@ -108,7 +108,7 @@ codex --ignore-user-config "用默认配置跑一次，排除我的配置干扰"
 
 `--strict-config` 会让未知字段直接报错——升级后排查「配置写错但被静默忽略」很有用。
 
-## 15.5 五个命令，覆盖 80% 的自动化工序
+## 16.5 五个命令，覆盖 80% 的自动化工序
 
 | 命令 | 作用 | 典型用法 |
 |---|---|---|
@@ -134,7 +134,7 @@ git -C .worktrees/<name> diff
 codex archive <session-id>
 ```
 
-## 15.6 多 Agent
+## 16.6 多 Agent
 
 Codex 的多 agent 是「任务」级的：每个 subagent 是一条独立 thread，有自己的上下文。
 
@@ -158,7 +158,7 @@ Codex 的多 agent 是「任务」级的：每个 subagent 是一条独立 threa
 - 需要在 subagent 之间共享文件时，用 worktree 隔离，否则会互相覆盖。
 - subagent 的审批请求会冒泡到主会话，别在无人值守时指望它自动解决。
 
-## 15.7 TUI 里值得知道的命令
+## 16.7 TUI 里值得知道的命令
 
 | 命令 | 作用 |
 |---|---|
@@ -178,7 +178,7 @@ Codex 的多 agent 是「任务」级的：每个 subagent 是一条独立 threa
 | `/rollout` | 打印会话记录文件路径 |
 | `/experimental` | 打开实验特性 |
 
-## 15.8 服务化：app-server 与远程
+## 16.8 服务化：app-server 与远程
 
 ```bash
 codex app-server                 # 起 app-server（JSON-RPC）
@@ -194,7 +194,7 @@ codex remote-control             # 管理带远程控制的 daemon
 
 注意：默认会有一个共享 daemon，`--no-daemon` 可以绕开——排查「多端状态不一致」时有用。
 
-## 15.9 排错路径
+## 16.9 排错路径
 
 | 现象 | 先查 |
 |---|---|
@@ -206,7 +206,7 @@ codex remote-control             # 管理带远程控制的 daemon
 | 多端状态混乱 | `--no-daemon` 重试，或 `/daemon` 重启 |
 | TUI 渲染问题 | `--no-alt-screen`、`/theme`、`/tui` |
 
-## 15.10 技巧与坑
+## 16.10 技巧与坑
 
 - **`-a never` 不等于「无限制」**：它只是不问，沙箱仍然生效。真正的无限制要 `danger-full-access`。
 - **`--ephemeral` 是 CI 必备**：否则每次跑都在 `~/.codex/sessions` 留一堆会话。
@@ -217,7 +217,7 @@ codex remote-control             # 管理带远程控制的 daemon
 - **token 用量看 `/usage`**，长会话配合 `/compact`、`/recap`。
 - **`/pet` 不是玩笑**：有些人用状态栏小宠物判断「它还在跑还是卡住了」，比读日志快。
 
-## 15.11 练习
+## 16.11 练习
 
 1. 用 `read-only` 与 `workspace-write` 各跑一次同一个任务，记录哪些操作被拒、错误文案是什么。
 2. 写一个 `review` profile，让 `codex -p review` 等价于「高思考 + 只读 + 不问人」。

@@ -34,15 +34,15 @@ const SOURCES = [
   'book/11-workflows.md',
   'book/12-multi-agent.md',
   'book/13-pi.md',
-  'book/14-claude-code.md',
-  'book/15-codex.md',
-  'book/16-internals.md',
-  'book/17-migration.md',
+  'book/14-omp.md',
+  'book/15-claude-code.md',
+  'book/16-codex.md',
+  'book/17-internals.md',
+  'book/18-migration.md',
   'appendix/a-commands.md',
   'appendix/b-keybindings.md',
   'appendix/c-configs.md',
   'appendix/d-faq.md',
-  'appendix/e-omp.md',
 ];
 
 const CHECK_ONLY = process.argv.includes('--check');

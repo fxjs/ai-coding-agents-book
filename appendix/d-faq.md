@@ -8,7 +8,7 @@
 能。它们各自独立（`~/.pi`、`~/.claude`、`~/.codex`）。唯一会互相影响的是环境变量：`ANTHROPIC_API_KEY` 同时被 Pi 与 Claude 读取；Bedrock/Vertex 相关变量也会影响 Pi 的 provider 选择。
 
 **Q：omp 和 Pi 是什么关系？**
-omp 是 Pi 的 fork，配置根从 `.pi` 换成 `.omp`，默认内置 LSP、DAP、subagent 与权限层。它不读取 `.pi` 下的配置；迁移步骤见附录 E。
+omp 是 Pi 的 fork，配置根从 `.pi` 换成 `.omp`，默认内置 LSP、DAP、subagent 与权限层。它不读取 `.pi` 下的配置；迁移步骤见第 14 章。
 
 **Q：必须用某个特定模型吗？**
 Pi 最自由（任意 provider + 本地）。Claude Code 绑定 Claude 系（含 Bedrock/Vertex）。Codex 绑定 OpenAI 系（含 OSS 本地）。跨系使用需要兼容网关。
@@ -96,8 +96,8 @@ Pi 最自由（任意 provider + 本地）。Claude Code 绑定 Claude 系（含
 | **turn** | 一次模型请求 + 该请求产生的所有工具调用 | 1.2 |
 | **token** | 模型计费与上下文的最小单位；中文约 1 字 ≈ 1–2 token，代码约 1 行 ≈ 12 token | 1.3 / 10.4 |
 | **context window** | 单次请求能容纳的最大 token 数 | 1.3 |
-| **compaction（压缩）** | 用摘要替换较早消息，腾出上下文；原文仍保留在会话文件 | 6.4 / 16.4 |
-| **cut point（切点）** | 压缩时允许开始保留的位置；工具结果不能单独作为切点 | 16.4 |
+| **compaction（压缩）** | 用摘要替换较早消息，腾出上下文；原文仍保留在会话文件 | 6.4 / 17.4 |
+| **cut point（切点）** | 压缩时允许开始保留的位置；工具结果不能单独作为切点 | 17.4 |
 | **session（会话）** | 一段对话及其全部事件的持久化记录 | 6.3 |
 | **branch（分支）** | 会话树中的一条从根到叶的路径 | 6.3 |
 | **checkpoint** | Claude Code 的可回滚点（含文件状态） | 6.3 |
@@ -117,7 +117,7 @@ Pi 最自由（任意 provider + 本地）。Claude Code 绑定 Claude 系（含
 | **prompt injection** | 不可信内容里夹带指令，诱导 agent 做危险操作 | 7.8 |
 | **prefix cache（前缀缓存）** | 对重复前缀按低价计费的机制，对消息顺序敏感 | 10.6 |
 | **reasoning effort / thinking** | 模型在回答前生成内部推理的强度档位 | 10.3 |
-| **rollout** | Codex 的会话事件记录文件 | 16.3 |
+| **rollout** | Codex 的会话事件记录文件 | 17.3 |
 | **RPC** | Pi 的 JSONL 双向协议，用于长驻集成 | 5.6 / 13.5 |
 | **SDK** | 进程内嵌入 Pi 的 TypeScript 接口 | 5.7 |
 | **codemode** | 让模型写脚本批量调用工具的模式（Pi / Codex） | 1.4 / 9.2 |

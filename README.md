@@ -22,17 +22,17 @@
 - 上下文爆了会怎样？压缩是怎么做的？为什么它「忘了」前面的约定？
 - 扩展、技能、插件、MCP、hooks 到底谁管什么？
 
-这本书把这些问题拆成 17 章、5 个附录，配一个可以真跑的小项目 `examples/task-cli`。
+这本书把这些问题拆成 18 章、4 个附录，配一个可以真跑的小项目 `examples/task-cli`。
 
 ## 谁适合读
 
 | 你是 | 怎么读 |
 |---|---|
 | 第一次接触 coding agent | 第 1–3 章顺序读，先跑起来 |
-| 已经在用其中一个 | 第 4–7 章补课，对应工具专章（13/14/15）查漏，附录 E 看 omp 增强，第 17 章看迁移 |
+| 已经在用其中一个 | 第 4–7 章补课，对应工具专章（13–16）查漏，第 14 章看 omp 增强，第 18 章看迁移 |
 | 要把它接进团队/CI | 第 5、7、9、11、12 章 |
-| 想写扩展、做二次开发 | 第 8、9、13、16 章 + `examples/pi-extensions` |
-| 做技术选型 | 第 1、7、10、17 章 + 附录 A |
+| 想写扩展、做二次开发 | 第 8、9、13、14、17 章 + `examples/pi-extensions` |
+| 做技术选型 | 第 1、7、10、18 章 + 附录 A |
 
 ## 目录
 
@@ -54,10 +54,11 @@
 | 11 | [实战工作流：TDD、重构、审查、排错](book/11-workflows.md) | 五个高频场景的完整提示词与流程 |
 | 12 | [多 agent、并行与云端](book/12-multi-agent.md) | subagent、worktree、后台与云任务 |
 | 13 | [工具专章：Pi](book/13-pi.md) | 可编程内核、多 provider 路由、SDK 嵌入 |
-| 14 | [工具专章：Claude Code](book/14-claude-code.md) | 权限三件套、checkpoint、后台与云 |
-| 15 | [工具专章：Codex](book/15-codex.md) | 沙箱 × 审批、exec 流水线、多 agent |
-| 16 | [内部原理：agent loop、协议与会话格式](book/16-internals.md) | 自己实现一个迷你 agent |
-| 17 | [横向对比、选型与迁移](book/17-migration.md) | 决策矩阵与配置迁移 |
+| 14 | [omp 实战手册](book/14-omp.md) | 安装、CLI、TUI、工具、子 agent、扩展与自动化 |
+| 15 | [工具专章：Claude Code](book/15-claude-code.md) | 权限三件套、checkpoint、后台与云 |
+| 16 | [工具专章：Codex](book/16-codex.md) | 沙箱 × 审批、exec 流水线、多 agent |
+| 17 | [内部原理：agent loop、协议与会话格式](book/17-internals.md) | 自己实现一个迷你 agent |
+| 18 | [横向对比、选型与迁移](book/18-migration.md) | 决策矩阵与配置迁移 |
 
 ### 附录
 
@@ -67,7 +68,6 @@
 | [B](appendix/b-keybindings.md) | 键位总表 |
 | [C](appendix/c-configs.md) | 配置模板合集 |
 | [D](appendix/d-faq.md) | FAQ 与术语表 |
-| [E](appendix/e-omp.md) | omp 实战手册：安装、CLI、TUI、工具、子 agent、扩展与自动化 |
 
 ## 三条阅读路径
 
@@ -75,7 +75,7 @@
 flowchart LR
   A[想尽快上手] --> A1[2 → 3 → 4]
   B[想接进工程] --> B1[5 → 6 → 7 → 11]
-  C[想做扩展/选型] --> C1[8 → 9 → 13 → 16 → 17]
+  C[想做扩展/选型] --> C1[8 → 9 → 13 → 14 → 17 → 18]
 ```
 
 ## 配套代码

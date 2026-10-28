@@ -3,7 +3,7 @@
 ## 结构
 
 ```
-book/       正文章节（00 前言 + 01–17 章）
+book/       正文章节（00 前言 + 01–18 章）
 appendix/   A 命令 / B 键位 / C 配置 / D FAQ
 examples/   配套代码（task-cli、Pi 扩展、技能、模板、MCP、CI）
 build/      构建与检查脚本（零依赖）

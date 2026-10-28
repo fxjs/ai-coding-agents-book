@@ -1,11 +1,11 @@
-# 第 14 章 工具专章：Claude Code
+# 第 15 章 工具专章：Claude Code
 
 > 本章你将学会：
 > - 用 hooks + 权限规则把「团队规范」变成确定性行为
 > - 用 checkpoint 与后台会话重构你的工作节奏
 > - 判断哪些能力只有 Claude Code 有，值不值得为它绑定生态
 
-## 14.1 生态地图
+## 15.1 生态地图
 
 ```mermaid
 flowchart TB
@@ -30,9 +30,9 @@ flowchart TB
 
 一句话概括：**Claude Code 把「agent + 权限 + 生命周期 + 云」做成了一体化产品**。好处是开箱即用，代价是配置面比较大。
 
-## 14.2 权限：三件套
+## 15.2 权限：三件套
 
-### 14.2.1 模式
+### 15.2.1 模式
 
 | 模式 | 行为 | 建议场景 |
 |---|---|---|
@@ -43,7 +43,7 @@ flowchart TB
 | `dontAsk` | 不问，按规则执行 | 受控环境 |
 | `bypassPermissions` | 全放行 | 一次性沙箱 |
 
-### 14.2.2 规则
+### 15.2.2 规则
 
 ```bash
 claude --allowedTools "Read" "Grep" "Edit" "Bash(npm test:*)" "Bash(git diff:*)"
@@ -52,7 +52,7 @@ claude --disallowedTools "Bash(git push:*)" "Read(./.env*)"
 
 规则是**模式匹配**，不是沙箱。它挡住的是「agent 主动想做的事」，挡不住「你让它做的事」和「它想出来的新花样」。所以关键拦截要靠 hooks。
 
-### 14.2.3 Hooks（确定性）
+### 15.2.3 Hooks（确定性）
 
 ```json
 {
@@ -84,7 +84,7 @@ esac
 exit 0
 ```
 
-## 14.3 Checkpoint：把「后悔药」做进流程
+## 15.3 Checkpoint：把「后悔药」做进流程
 
 Claude Code 的 checkpoint 记录文件状态，`/rewind` 可以回到某个历史点，**连文件一起回滚**（`--rewind-files <message-id>`）。
 
@@ -99,9 +99,9 @@ Claude Code 的 checkpoint 记录文件状态，`/rewind` 可以回到某个历�
 
 **与 git 的分工**：checkpoint 适合「会话内的快速试探」，git 适合「跨会话的正式记录」。两者都用，不要用 checkpoint 替代提交。
 
-## 14.4 后台与云
+## 15.4 后台与云
 
-### 14.4.1 后台会话
+### 15.4.1 后台会话
 
 ```bash
 claude --bg "把 docs/ 里过时的 API 示例更新一遍"
@@ -114,7 +114,7 @@ claude rm <id>                # 移除
 
 适合：长任务、批量任务、你不想占用终端的时候。后台会话仍然遵循权限与会话持久化设置。
 
-### 14.4.2 云与远程
+### 15.4.2 云与远程
 
 ```bash
 claude --cloud "在云上跑完整的构建与测试"
@@ -126,7 +126,7 @@ claude --remote-control                # 开启远程控制
 
 云端的价值在于**环境一致性**：不是你的笔记本，而是团队统一的镜像。CI 里复现不了的问题，去云上跑常常能定位。
 
-## 14.5 结构化输出与 CI
+## 15.5 结构化输出与 CI
 
 ```bash
 # 单条结果（含 usage/cost 等字段）
@@ -157,7 +157,7 @@ claude -p \
 - `--max-budget-usd`：硬上限。
 - `--fallback-model`：主模型过载时降级（注意行为差异）。
 
-## 14.6 设置分层
+## 15.6 设置分层
 
 ```text
 企业托管策略（managed）
@@ -180,7 +180,7 @@ claude -p \
 | `--safe-mode` | 关闭所有自定义（插件、MCP、hooks、主题…），排查「是不是配置把工具搞坏了」 |
 | `--restricted` | 移除执行类工具、限制文件访问范围，用于受限环境 |
 
-## 14.7 subagent
+## 15.7 subagent
 
 定义方式两种：
 
@@ -206,7 +206,7 @@ tools: Read, Grep, Glob
 - **限定 `tools`**：只读 subagent 就不要给 `Edit`。
 - **subagent 也会烧钱**：每个都要重发系统提示。
 
-## 14.8 技巧与坑
+## 15.8 技巧与坑
 
 - **`Shift+Tab` 是你的安全带**：切到 plan 看一眼方案，再切回 acceptEdits 执行。比一路放行省时间。
 - **hooks 里的 `jq` 要判空**：`tool_input` 结构随工具不同，写 `.tool_input.command // .tool_input.file_path`。
@@ -216,7 +216,7 @@ tools: Read, Grep, Glob
 - **项目级设置里不要放密钥**：会被提交。用环境变量或企业托管策略。
 - **插件要审**：`--plugin-url` 拉下来的插件有代码执行能力。
 
-## 14.9 练习
+## 15.9 练习
 
 1. 用 `plan` 模式做一次完整的需求分析，再切 `acceptEdits` 执行，比较两种模式的产物差异。
 2. 写一个 `PreToolUse` hook：禁止 `Write` 到 `src/generated/`，并用一条命令验证。

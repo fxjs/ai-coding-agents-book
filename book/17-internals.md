@@ -1,11 +1,11 @@
-# 第 16 章 内部原理：agent loop、协议与会话格式
+# 第 17 章 内部原理：agent loop、协议与会话格式
 
 > 本章你将学会：
 > - 用约 100 行代码实现一个能读文件、跑命令、改代码的最小 agent
 > - 看懂三家会话文件的格式与压缩条目的结构
 > - 判断一个「新出的 coding agent」在架构上是否靠谱
 
-## 16.1 最小可用 Agent
+## 17.1 最小可用 Agent
 
 去掉 UI、权限、压缩、扩展，agent 的内核只有四件事：
 
@@ -149,7 +149,7 @@ OPENAI_API_KEY=... MODEL=gpt-5.1 node mini-agent.mjs "读 README.md，然后告�
 
 **缺的东西才是工程量所在**：权限、沙箱、流式、压缩、重试、会话持久化、UI、扩展。这也是为什么「自研一个能跑的只要一个下午，能用于生产要半年」。
 
-## 16.2 消息格式：三家本质相同
+## 17.2 消息格式：三家本质相同
 
 所有实现最终都归一化成三类消息：
 
@@ -174,7 +174,7 @@ OPENAI_API_KEY=... MODEL=gpt-5.1 node mini-agent.mjs "读 README.md，然后告�
 
 Pi 的 `message-types.md` 里定义了 content block：`text`、`thinking`、`tool_call`、图片等。**统一成 block 数组**的好处是：思考、文本、工具调用可以交错存在，渲染层可以按块折叠。
 
-## 16.3 会话文件：树，不是列表
+## 17.3 会话文件：树，不是列表
 
 Pi 的会话是 JSONL，第一行是头，之后每行是一个带 `id`/`parentId` 的条目：
 
@@ -194,7 +194,7 @@ Pi 的会话是 JSONL，第一行是头，之后每行是一个带 `id`/`parentI
 
 Codex 用类似的 rollout（JSONL 事件流）+ 分页历史；Claude 用 JSONL 转录 + checkpoint。格式不同，思想一致：**追加写、可回放、可分支**。
 
-## 16.4 压缩是怎么算的
+## 17.4 压缩是怎么算的
 
 Pi 的触发条件是：
 
@@ -228,7 +228,7 @@ contextTokens > contextWindow - reserveTokens        # reserveTokens 默认 1638
 
 **实践建议**：自定义压缩指示时，重点保 `Constraints & Preferences` 与 `Critical Context`——这两块最容易丢，也最影响后续行为（「不要改测试断言」丢了，下一轮它就会改）。
 
-## 16.5 RPC 协议的实现要点
+## 17.5 RPC 协议的实现要点
 
 Pi 的 RPC 是「JSONL 双向流」，实现时有五个坑：
 
@@ -249,7 +249,7 @@ Agent_start → turn_start → message_start/update/end → turn_start … → t
 
 `agent_end` **不是**最终信号——这是自研客户端最常见的 bug（提前退出，丢掉重试结果）。
 
-## 16.6 工具设计的五条原则
+## 17.6 工具设计的五条原则
 
 从三家的实现里能提炼出同一套原则：
 
@@ -261,7 +261,7 @@ Agent_start → turn_start → message_start/update/end → turn_start … → t
 
 Pi 额外要求 `content`（给模型）+ `details`（给渲染/状态），并建议文件写操作用 `withFileMutationQueue()` 串行化——**并发写同一个文件是真实存在的 bug 源**。
 
-## 16.7 三家的架构对照
+## 17.7 三家的架构对照
 
 | 维度 | Pi | Claude Code | Codex |
 |---|---|---|---|
@@ -273,7 +273,7 @@ Pi 额外要求 `content`（给模型）+ `details`（给渲染/状态），并�
 | 外部接口 | JSON / RPC / TS SDK | print + stream-json | exec + JSON + app-server |
 | 独特实现 | `codemode`（脚本调工具）、树会话 | checkpoint、后台/云会话 | OS 沙箱、多 agent、`apply_patch` |
 
-## 16.8 如果你要自己做一个
+## 17.8 如果你要自己做一个
 
 最小可行路线（按顺序）：
 
@@ -288,7 +288,7 @@ Pi 额外要求 `content`（给模型）+ `details`（给渲染/状态），并�
 
 **不要做的事**：一开始就写插件系统、多 agent、云端。这三样都是「内核稳定后才有意义」的东西。
 
-## 16.9 练习
+## 17.9 练习
 
 1. 跑通 `mini-agent.mjs`，然后故意把 `MAX_TURNS` 设为 3，观察它如何被强行截断。
 2. 给它加一个 `grep` 工具（用 `rg`），对比「读整个文件」与「grep 定位」的 token 消耗。

@@ -1,15 +1,15 @@
-# 附录 E omp 实战手册
+# 第 14 章 omp 实战手册
 
 > 基准版本：omp `18.12.6`（本机 `omp --version`；上游 [`can1357/oh-my-pi`](https://github.com/can1357/oh-my-pi)，2026-10 核对）。omp 发版很密，⚠️ 具体参数以 `omp --help`、`omp <command> --help`、`omp config list` 为准。
 >
-> 本附录你将学会：
+> 本章你将学会：
 > - 判断 omp 与 Pi 的取舍，知道它多做了什么、代价是什么
 > - 从安装、登录到跑通第一次会话
 > - 按类别使用 CLI 子命令与启动参数
 > - 用 TUI、斜杠命令、会话树与压缩管理长任务
 > - 配置模型角色、工具面、子 agent、扩展与自动化接口
 
-## E.1 omp 是什么
+## 14.1 omp 是什么
 
 omp 是 [Pi](https://github.com/badlogic/pi-mono) 的 fork，由 Stencil Labs 维护。它不是「另一个从零写的 agent」，而是把 Pi 的内核做成**开箱即用的 coding 产品**：保留终端优先的交互，同时内置 LSP、DAP、subagent、记忆、权限层和大量 provider。
 
@@ -52,11 +52,11 @@ flowchart TB
   CORE --> MODELS[模型层<br/>60+ provider·角色路由]
 ```
 
-图 E-1 omp 的入口与分层。读图要点：四个入口共用同一套会话引擎；扩展改的是工具与提示词，不另起协议。
+图 14-1 omp 的入口与分层。读图要点：四个入口共用同一套会话引擎；扩展改的是工具与提示词，不另起协议。
 
-**选型建议**：想要「装上就能在真实仓库里改代码、跑测试、调 LSP/DAP」，omp 的默认值更省事；想要最小内核、自己掌控每一层，Pi 更合适。omp 的代价是体积更大、版本变化更快、默认权限更松（见 E.13）。
+**选型建议**：想要「装上就能在真实仓库里改代码、跑测试、调 LSP/DAP」，omp 的默认值更省事；想要最小内核、自己掌控每一层，Pi 更合适。omp 的代价是体积更大、版本变化更快、默认权限更松（见 14.13）。
 
-## E.2 安装与升级
+## 14.2 安装与升级
 
 macOS / Linux：
 
@@ -115,7 +115,7 @@ omp update --plugins
 
 ⚠️ 版本敏感：omp 的小版本可能改默认值或命令名；升级后先跑 `omp --help` 与 `omp config list` 对照。
 
-## E.3 第一次运行
+## 14.3 第一次运行
 
 最短路径：
 
@@ -137,7 +137,7 @@ omp models refresh
 
 `omp models refresh` 会重建模型目录缓存；`omp models --json` 适合脚本。
 
-### E.3.1 交互、一次性与附件
+### 14.3.1 交互、一次性与附件
 
 ```bash
 omp                         # 进入 TUI
@@ -149,7 +149,7 @@ echo "审查这个 diff" | omp -p
 
 `@<path>` 会把文件或图片附加到初始消息。非 TTY stdin 会自动读入，不需要 `-`。`--` 之后的全部内容都按字面消息处理。
 
-### E.3.2 配置放在哪
+### 14.3.2 配置放在哪
 
 | 路径 | 内容 |
 |---|---|
@@ -167,7 +167,7 @@ echo "审查这个 diff" | omp -p
 | `~/.omp/agent/sessions/` | 会话文件 |
 | `~/.omp/agent/AGENTS.md`、`RULES.md` | 用户级上下文 / 常驻规则 |
 
-项目级把 `~/.omp/agent` 换成 `<cwd>/.omp` 即可。omp 还会读取 `.claude/`、`.codex/`、`.gemini/`、`.cursor/`、`.windsurf/`、`.cline/`、`.github/copilot/`、`.vscode/` 等既有配置，见 E.11。
+项目级把 `~/.omp/agent` 换成 `<cwd>/.omp` 即可。omp 还会读取 `.claude/`、`.codex/`、`.gemini/`、`.cursor/`、`.windsurf/`、`.cline/`、`.github/copilot/`、`.vscode/` 等既有配置，见 14.11。
 
 设置优先级从低到高：
 
@@ -186,7 +186,7 @@ omp config reset tools.approvalMode
 omp config path
 ```
 
-### E.3.3 Profile：把工作和个人分开
+### 14.3.3 Profile：把工作和个人分开
 
 ```bash
 omp --profile work
@@ -197,7 +197,7 @@ omp --profile work config path
 
 Profile 会隔离 auth、会话、设置和缓存，路径默认是 `~/.omp/profiles/<name>/agent`。`OMP_PROFILE` 优先于 `PI_PROFILE`；显式 `--profile` 又优先于两者。键位是例外：默认 profile 的 `keybindings.yml` 会先加载，再由当前 profile 逐项覆盖。
 
-### E.3.4 项目输入与信任边界
+### 14.3.4 项目输入与信任边界
 
 打开仓库时，omp **按设计**加载项目里的 settings、extensions、hooks、tools、commands、skills、rules 与 MCP 配置。这些输入属于项目的一部分，不要默认把仓库里的代码当成已审过的安全代码；不可信仓库要主动收窄输入：
 
@@ -221,7 +221,7 @@ mcp:
 - `--no-extensions` 只关闭环境发现，显式 `-e` 仍会加载。
 - `--no-tools` 关闭内置工具，但项目工具模块是独立发现面，不等于「项目里没有任何可执行代码」。
 
-## E.4 CLI 地图
+## 14.4 CLI 地图
 
 调用形状：
 
@@ -231,7 +231,7 @@ omp [command] [flags] [messages...]
 
 第一个位置参数不是注册子命令时，omp 会把它当成 prompt 走默认的 `launch`。所以 `omp "fix the build"` 进入会话，而 `omp models` 执行子命令。`marketplace`、`uninstall`、`extensions` 这类裸词会提示你改用 `omp plugin …`；真要把它当 prompt，用 `omp launch <word>`。
 
-### E.4.1 启动参数（launch flags）
+### 14.4.1 启动参数（launch flags）
 
 会话和工作区：
 
@@ -315,7 +315,7 @@ omp [command] [flags] [messages...]
 | `--no-ui` | 在 RPC/RPC-UI 下让扩展无 UI |
 | `-h`, `--help` / `-v`, `--version` | 帮助 / 版本 |
 
-### E.4.2 子命令
+### 14.4.2 子命令
 
 `omp --help` 列出全部子命令；这里是按用途分组的高频项。
 
@@ -361,7 +361,7 @@ omp [command] [flags] [messages...]
 
 `omp <command> --help` 才是该命令的权威参数表。`__complete` 是补全脚本用的隐藏命令，不需要手动调用。
 
-## E.5 交互式 TUI
+## 14.5 交互式 TUI
 
 ```text
 ┌────────────────────────────────────────────────────┐
@@ -378,7 +378,7 @@ omp [command] [flags] [messages...]
 └────────────────────────────────────────────────────┘
 ```
 
-图 E-2 TUI 的五个区域：状态行、对话与工具卡、审批 dock、输入框、键位提示。读图要点：**审批发生在工具执行前**，不是执行后追认。
+图 14-2 TUI 的五个区域：状态行、对话与工具卡、审批 dock、输入框、键位提示。读图要点：**审批发生在工具执行前**，不是执行后追认。
 
 常用键位（`/hotkeys` 查看当前生效值）：
 
@@ -415,7 +415,7 @@ app.history.search: []
 
 其他交互能力：
 
-- **审批**：四种模式与三档工具分级，见 E.13；`/forget-approvals` 清空「记住的批准」。
+- **审批**：四种模式与三档工具分级，见 14.13；`/forget-approvals` 清空「记住的批准」。
 - **结构化提问**：agent 可调用 `ask` 工具弹出选项，而不是在正文里猜。
 - **消息队列**：运行中发送的消息默认排队，可 steer/follow-up，不丢草稿。
 - **粘贴与图片**：支持图片粘贴、文件路径附件、`@` 引用；Windows Terminal 若吞掉 `Ctrl+V`，用 `Alt+V`。
@@ -424,11 +424,11 @@ app.history.search: []
 - **录制**：`/record` 录屏，`omp play` 回放，`omp clip` 上传。
 - **Agent Hub**：`Alt+A` 看每个 subagent 的状态、模型、成本、上下文和当前工具；可读 transcript、发消息、复活或 kill。
 
-## E.6 斜杠命令
+## 14.6 斜杠命令
 
 内置命令按 `/` 自动补全；输入 `/help` 或看 `/hotkeys`。`/skill:<name>` 是技能入口，不属于内置命令。
 
-### E.6.1 高频命令
+### 14.6.1 高频命令
 
 | 命令 | 作用 |
 |---|---|
@@ -464,7 +464,7 @@ app.history.search: []
 | `/help` | 帮助 |
 | `/quit` / `/exit` | 退出 |
 
-### E.6.2 会话与上下文
+### 14.6.2 会话与上下文
 
 | 命令 | 作用 |
 |---|---|
@@ -483,7 +483,7 @@ app.history.search: []
 | `/trace` | 在 stats 面板打开本会话 trace |
 | `/copy` / `/open` | 从对话里选文本复制 / 打开最后链接 |
 
-### E.6.3 模型、模式与质量
+### 14.6.3 模型、模式与质量
 
 | 命令 | 作用 |
 |---|---|
@@ -505,7 +505,7 @@ app.history.search: []
 | `/live` / `/record` / `/pause` | 实时语音 / 录屏 / 冻结所有 agent |
 | `/seance [id]` | 把历史会话 fork 成只读顾问 subagent |
 
-### E.6.4 协作与分发
+### 14.6.4 协作与分发
 
 | 命令 | 作用 |
 |---|---|
@@ -520,7 +520,7 @@ app.history.search: []
 | `/git` | 内置 git UI |
 | `/pause` / `/forget-approvals` | 冻结 agent / 清除已记住的批准 |
 
-### E.6.5 文件式命令与技能命令
+### 14.6.5 文件式命令与技能命令
 
 在 `.omp/commands/` 或 `~/.omp/agent/commands/` 放 Markdown，就能定义 `/命令名`：
 
@@ -543,9 +543,9 @@ app.history.search: []
 /skill:code-review 审查 src/session.ts 的并发问题
 ```
 
-## E.7 会话、分支与压缩
+## 14.7 会话、分支与压缩
 
-### E.7.1 保存、恢复、分叉
+### 14.7.1 保存、恢复、分叉
 
 ```bash
 omp -c                          # 继续上一个
@@ -579,7 +579,7 @@ omp anonymize 01a0285c -o ./bug-report
 
 它会保留结构、把 turn 内容脱敏、把路径与字面量替换成一致的 mock token；不是简单删几行。
 
-### E.7.2 会话树与分支
+### 14.7.2 会话树与分支
 
 ```text
 /tree
@@ -588,14 +588,14 @@ omp anonymize 01a0285c -o ./bug-report
 │  └─ agent：方案 B
 ```
 
-图 E-3 会话树。读图要点：`•` 标出当前路径；切换分支不会删除另一条分支，只在原分支上留一条 branch summary。
+图 14-3 会话树。读图要点：`•` 标出当前路径；切换分支不会删除另一条分支，只在原分支上留一条 branch summary。
 
 - `Enter` 跳到节点继续；`Shift+Enter` 先摘要再切换；`Shift+L` 打标签。
 - `Ctrl+O` / `Shift+Ctrl+O` 循环过滤：默认、无工具、仅用户、仅有标签、全部。
 - `/fork` 从当前节点开新会话；`/fork pane` 在 tmux/Zellij 等新 pane 打开。
 - 分支被放弃时，omp 会写 branch summary，而不是把旧上下文直接丢掉。
 
-### E.7.3 压缩与瘦身
+### 14.7.3 压缩与瘦身
 
 | 操作 | 命令/触发 | 结果 |
 |---|---|---|
@@ -622,7 +622,7 @@ compaction:
 
 `compaction.thresholdTokens` 是固定 token 触发；`compaction.modelThresholds` 可按模型覆盖。`compaction.reserveTokens` 是绝对保留量，未设置时取 `max(16384, 15% 窗口)`。
 
-### E.7.4 导出、分享与协作
+### 14.7.4 导出、分享与协作
 
 ```text
 /export [--themes] [path]    # 本地 HTML，未脱敏
@@ -637,9 +637,9 @@ compaction:
 
 `/collab` 把当前会话挂到 relay，返回 `omp join <...>` 命令、浏览器链接和二维码；帧在客户端加密，relay 看不到密钥。
 
-## E.8 模型、角色与成本
+## 14.8 模型、角色与成本
 
-### E.8.1 角色路由
+### 14.8.1 角色路由
 
 omp 把模型按用途分成角色，而不是只有一个「当前模型」：
 
@@ -677,7 +677,7 @@ retry:
 
 角色值可以带思考后缀（`:low`、`:high`、`:max`、`:inherit`）或引用另一个角色（`@smol`）。`retry.fallbackChains` 支持按角色、精确模型或 provider 通配配置；显式 `[]` 表示不降级。
 
-### E.8.2 自定义 provider
+### 14.8.2 自定义 provider
 
 `~/.omp/agent/models.yml`：
 
@@ -708,7 +708,7 @@ modelRoles:
 
 支持的 API 形状包括 `openai-completions`、`openai-responses`、`openai-codex-responses`、`azure-openai-responses`、`anthropic-messages`、`bedrock-converse-stream`、`google-generative-ai`、`google-gemini-cli`、`google-vertex` 等。
 
-### E.8.3 凭据与路由技巧
+### 14.8.3 凭据与路由技巧
 
 API key 解析顺序（从高到低）：
 
@@ -736,7 +736,7 @@ enabledModels:
       - anthropic/claude-opus-4-5
 ```
 
-### E.8.4 成本控制
+### 14.8.4 成本控制
 
 ```text
 /fast                  # priority 档，快但贵
@@ -758,7 +758,7 @@ omp toks src/session.ts
 
 `omp usage` 汇总每个已认证账号的额度；`omp stats` 打开本地用量看板；`omp bench` 用 p50/p95 比较 TTFT、prefill、decode 与并行扩展。
 
-## E.9 工具面
+## 14.9 工具面
 
 上游 README 标称 31 个内置工具；实际可见集合随版本和设置变化。会话里用 `/tools` 看当前模型真正拿到的清单，用 `read xd://` 看隐藏的 `xd://` 设备。
 
@@ -788,7 +788,7 @@ omp toks src/session.ts
 
 默认关闭或按设置开启：`github`、`security_scan`、`generate_image`、`tts`、`checkpoint`、`rewind`，以及按 `memory.backend` 决定的记忆工具。
 
-### E.9.1 read 的多态
+### 14.9.1 read 的多态
 
 `read` 是 omp 最像「文件系统抽象层」的工具：
 
@@ -812,7 +812,7 @@ read conflict://1               # 解决冲突
 
 一个重要的行为：大文件默认会**结构化摘要**（保留签名、导入、关键块），不是把整文件倒进上下文；需要逐字时加 `:raw`。
 
-### E.9.2 编辑：hashline 与 AST
+### 14.9.2 编辑：hashline 与 AST
 
 默认 `edit` 不是「字符串替换」，而是带快照标签的行锚点补丁：
 
@@ -826,7 +826,7 @@ PUT 4.=4:
 
 `ast_edit` 先返回 `(proposed)` 预览，模型写一行理由到 `xd://resolve`，TUI 变成 Accept 卡后才真正落盘，全有或全无。改结构（重命名、替换调用、codemod）优先用它，不要用正则硬改。
 
-### E.9.3 内部 URL 与 xd://
+### 14.9.3 内部 URL 与 xd://
 
 omp 把 PR、issue、subagent 输出、技能、远程文件都映射成路径。上游 README 说共有 16 种内置 scheme，常用的有：
 
@@ -859,7 +859,7 @@ write xd://<tool>  { ...JSON 参数... }
 
 只有 `tools.xdev` 开启时可用。
 
-### E.9.4 LSP、DAP 与写路径
+### 14.9.4 LSP、DAP 与写路径
 
 omp 内置 LSP，不是把 IDE 当外部服务：
 
@@ -869,7 +869,7 @@ omp 内置 LSP，不是把 IDE 当外部服务：
 
 DAP 支持 lldb-dap、dlv、debugpy 等：agent 可以 attach、下断点、单步、读栈帧和变量，而不是靠 `print` 猜。
 
-### E.9.5 eval、浏览器与桌面
+### 14.9.5 eval、浏览器与桌面
 
 `eval` 有两个持久内核：
 
@@ -880,7 +880,7 @@ DAP 支持 lldb-dap、dlv、debugpy 等：agent 可以 attach、下断点、单�
 
 `browser` 提供 `open`、导航、检查、交互、元素查询与 `tab.run(js)`；可以接 headless Chromium、CDP 应用，或通过 browser-relay 接管你已有的 Chrome tab。`computer` 则操作真实桌面：窗口枚举、截图、原生输入、AX 树、剪贴板。两者审批等级不同，默认关闭的 `computer` 需要显式开启。
 
-### E.9.6 web_search
+### 14.9.6 web_search
 
 `web_search` 是内建工具，不依赖某个搜索 MCP：
 
@@ -889,9 +889,9 @@ DAP 支持 lldb-dap、dlv、debugpy 等：agent 可以 attach、下断点、单�
 - GitHub、npm/PyPI/crates.io、arXiv、Stack Overflow、MDN、docs.rs 等站点会转成结构化 Markdown；
 - 返回答案 + 引用，`read` 可直接跟进 URL。
 
-## E.10 子 agent 与并行
+## 14.10 子 agent 与并行
 
-### E.10.1 task 的 wire 形状
+### 14.10.1 task 的 wire 形状
 
 `task` 默认批量模式，一次调用可以扇出多个独立 subagent：
 
@@ -935,7 +935,7 @@ DAP 支持 lldb-dap、dlv、debugpy 等：agent 可以 attach、下断点、单�
 
 批量调用里每个 item 可以用不同 agent。`task` 的并发上限默认 32，递归深度默认 2。
 
-### E.10.2 后台、等待与通信
+### 14.10.2 后台、等待与通信
 
 后台 spawn 返回 `agent://<id>` 与 job id；结果会自动送回父会话：
 
@@ -951,7 +951,7 @@ write proc://<jobId>/kill          # 取消
 
 `task.maxConcurrency` 默认 32；`task.agentIdleTtlMs` 默认 420000 ms（7 分钟），空闲后 park，消息或 Hub 可复活。每个 subagent 输出上限 500000 字节 / 5000 行（可用 `PI_TASK_MAX_OUTPUT_BYTES` / `PI_TASK_MAX_OUTPUT_LINES` 调整）。
 
-### E.10.3 隔离工作区
+### 14.10.3 隔离工作区
 
 `task.isolation.enabled: true` 时，`isolated: true` 的任务在独立工作区执行：
 
@@ -963,7 +963,7 @@ write proc://<jobId>/kill          # 取消
 
 嵌套 git 仓库会分别 diff、分别合并。快照基线上限 1 GiB。
 
-### E.10.4 Agent Hub、vibe 与并发提示词
+### 14.10.4 Agent Hub、vibe 与并发提示词
 
 `Alt+A` 打开 Agent Hub：roster 显示 running/idle/parked/aborted、模型、成本、tokens、当前工具；`Enter` 聚焦某个 agent 的 transcript，可以直接发消息或改模型；`r` 复活，`x` kill。`/hub` 是同一入口。
 
@@ -986,7 +986,7 @@ vibe 模式把主会话变成导演，只保留 `read`、`todo` 和 5 个 worker
 
 `advisor` 用第二个模型逐回合旁路审查，发现偏离验收标准或风险时插入一条 note；它有自己的上下文与模型，不会把审查过程塞进主 agent 的对话历史。
 
-### E.10.5 worktree
+### 14.10.5 worktree
 
 ```bash
 omp worktree
@@ -998,9 +998,9 @@ omp worktree clear
 
 `/wt` 把当前会话连同未提交改动移进新 worktree，适合「先隔离再继续」。
 
-## E.11 扩展体系
+## 14.11 扩展体系
 
-### E.11.1 目录地图
+### 14.11.1 目录地图
 
 ```text
 .omp/
@@ -1022,7 +1022,7 @@ omp worktree clear
 
 用户级把根换成 `~/.omp/agent/`。原生 `.omp` provider 的优先级最高（100），高于 `.claude`（80）、`.codex`（70）、`.gemini`（60）等。
 
-### E.11.2 扩展
+### 14.11.2 扩展
 
 扩展是一个默认导出工厂的 TS/JS 模块：
 
@@ -1065,7 +1065,7 @@ export default function (pi: ExtensionAPI) {
 
 约束：**加载阶段只能注册**；`sendMessage` 等动作要等 runner 初始化后在事件/命令里调用。`/reload-plugins` 会重载 skills、commands、hooks、tools、agents、MCP；已加载的扩展模块不会凭空替换运行时。
 
-### E.11.3 技能
+### 14.11.3 技能
 
 技能是 `skills/<name>/SKILL.md`，至少要有 `name` 和 `description`（原生 provider 强制 description）：
 
@@ -1092,7 +1092,7 @@ omp skill search "pdf" --sort downloads
 omp skill publish ./skills/pdf-tools --dry-run
 ```
 
-### E.11.4 hooks
+### 14.11.4 hooks
 
 `--hook` 当前是 `--extension` 的别名；发现路径只扫 `hooks/pre/*.{ts,js}` 与 `hooks/post/*.{ts,js}`，直接放在 `hooks/` 下的文件不会被发现。hook 里同样用 `pi.on(...)`：
 
@@ -1106,7 +1106,7 @@ export default function (pi) {
 }
 ```
 
-### E.11.5 MCP
+### 14.11.5 MCP
 
 原生配置在 `.omp/mcp.json` 或 `~/.omp/agent/mcp.json`：
 
@@ -1136,7 +1136,7 @@ omp 还会导入 Claude Code、Codex、Gemini CLI、OpenCode、Cursor、Windsurf
 /mcp test <name>
 ```
 
-### E.11.6 插件与市场
+### 14.11.6 插件与市场
 
 插件是更大的分发单位，可以同时带 skills、commands、agents、rules、hooks、tools、MCP、LSP、DAP：
 
@@ -1150,7 +1150,7 @@ omp plugin doctor --fix
 
 TUI 内用 `/marketplace discover`、`/plugins list`、`/plugins enable|disable`。市场格式兼容 Claude Code 的 `.claude-plugin/marketplace.json`，也支持 `.omp-plugin/marketplace.json`。
 
-### E.11.7 复用其他工具留下的配置
+### 14.11.7 复用其他工具留下的配置
 
 omp 启动时会读取磁盘上已有的约定，不需要迁移脚本：
 
@@ -1163,9 +1163,9 @@ omp 启动时会读取磁盘上已有的约定，不需要迁移脚本：
 
 原生 `.omp` 优先；同名能力去重时高优先级 provider 赢。别把 `.pi/` 当成会被读取——omp 的通用发现顺序里没有 `.pi`。
 
-## E.12 自动化出口
+## 14.12 自动化出口
 
-### E.12.1 print 与 JSON
+### 14.12.1 print 与 JSON
 
 ```bash
 omp -p "总结最近一次提交"
@@ -1199,7 +1199,7 @@ jq -r 'select(.type == "message_end") | .message.content[]?.text' review.jsonl |
 
 只读工具在 `always-ask` 下自动通过；如果 agent 试图 `write`/`bash`，无人应答的审批会 fail closed，而不是偷偷放行。
 
-### E.12.2 RPC
+### 14.12.2 RPC
 
 ```bash
 omp --mode rpc --no-session
@@ -1216,7 +1216,7 @@ NDJSON stdin/stdout，不是 JSON-RPC 2.0：
 
 `--mode rpc-ui` 额外发 `extension_ui_request`（工具卡、选择器、对话框），宿主必须应答；`--no-ui` 让扩展进入无 UI 模式。
 
-### E.12.3 ACP
+### 14.12.3 ACP
 
 ```bash
 omp acp
@@ -1233,7 +1233,7 @@ ACP 是给编辑器（如 Zed）的 JSON-RPC 协议。编辑器声明能力后�
 
 也就是说，编辑器里的 omp 仍然用同一套工具，但读写会走编辑器缓冲区，破坏性操作走编辑器的权限弹窗。
 
-### E.12.4 SDK
+### 14.12.4 SDK
 
 ```ts
 import {
@@ -1258,7 +1258,7 @@ await session.prompt("list .ts files");
 
 SDK 适合把 agent 嵌进自己的服务，或者写批处理脚本。Node/TypeScript 宿主直接拿引擎；其他语言走 RPC/ACP。
 
-### E.12.5 专用子命令
+### 14.12.5 专用子命令
 
 ```bash
 omp commit --dry-run          # 看它会怎么拆提交
@@ -1272,9 +1272,9 @@ omp anonymize <session>       # 脱敏副本
 
 `omp commit` 不只看 `git diff`：它会读 `git_overview`、`git_file_diff`、`git_hunk`，把不相关的改动拆成原子提交，按依赖排序；有环时在写任何东西前拒绝。源文件优先于测试、文档、配置，lockfile 不参与分析。
 
-## E.13 权限、安全与边界
+## 14.13 权限、安全与边界
 
-### E.13.1 工具分级
+### 14.13.1 工具分级
 
 每个工具声明一个审批等级：
 
@@ -1286,7 +1286,7 @@ omp anonymize <session>       # 脱敏副本
 
 没有声明等级的工具按 `exec` 处理；MCP 工具按 `write` 处理。
 
-### E.13.2 四种审批模式
+### 14.13.2 四种审批模式
 
 | 模式 | 自动通过 | 会询问 |
 |---|---|---|
@@ -1315,20 +1315,20 @@ tools:
 
 `bash` 对 `rm -rf /`、fork bomb、远程下载后执行、写 `/etc/passwd`、关机等危险模式有强制 override：非 yolo 模式下会强制弹审批；但 **yolo 下这个裸 override 会被忽略**，只有显式 `prompt`/`deny` 策略仍然生效。所以不要把 yolo 当成安全边界。审批也不是沙箱：批准后的命令仍拥有 shell 的全部文件系统、网络和子进程权限。需要真正的隔离，用容器/VM/独立用户，或限制 `--tools`。
 
-### E.13.3 子 agent 的权限
+### 14.13.3 子 agent 的权限
 
 subagent 以 `tools.approvalMode: yolo` 运行——它没有交互 UI，无法回答审批。授权的边界是**父会话对 `task` 的批准**：父会话允许 `task`，就等于允许它启动的子 agent 在各自工具面内行动。per-tool 的 `deny` 仍然绝对生效；解析成 `prompt` 的调用在 headless 子 agent 里会直接失败。
 
-### E.13.4 项目输入、密钥与分享
+### 14.13.4 项目输入、密钥与分享
 
-- 项目配置、扩展、hooks、tools、skills、rules、MCP 默认加载；用 E.3.4 的 flag 收窄。
+- 项目配置、扩展、hooks、tools、skills、rules、MCP 默认加载；用 14.3.4 的 flag 收窄。
 - `omp auth export` 会导出**所有**已存凭据（API key 与 OAuth），文件必须当密钥保管；跨机迁移用 `omp auth export | ssh host omp auth import -`。
 - `omp token <provider>` 在运行时取 token，适合给其他脚本用，不必把 key 写进脚本。
 - `/share` 默认脱敏 + 加密，密钥只在 URL fragment；`/export`、`/dump` 是明文，可能含原始上下文、图片和扩展载荷。
 - `/collab` 的 relay 看不到密钥；但加入者能实时看到会话内容，别在不可信会话里开。
 - `--no-session` 不落盘，但工具输出仍可能进入日志/终端回放；`/record` 也会录下屏幕内容。
 
-## E.14 与 Pi 的差异与迁移
+## 14.14 与 Pi 的差异与迁移
 
 | 项 | Pi | omp | 迁移动作 |
 |---|---|---|---|
@@ -1351,7 +1351,7 @@ subagent 以 `tools.approvalMode: yolo` 运行——它没有交互 UI，无法�
 6. 先跑只读任务（`--tools read,grep,glob`），再放开写与 exec。
 7. 用 `/export` 留一份旧会话存档；确认不需要旧格式后再清理。
 
-## E.15 坑与边界
+## 14.15 坑与边界
 
 - **默认 yolo**：装上就能改文件、跑命令。不可信仓库先改审批模式。
 - **`--no-extensions` 不是万能开关**：显式 `-e` 仍加载，项目工具模块也仍可能被发现；要更严格用 `--trusted-extension` 或容器。
@@ -1369,7 +1369,7 @@ subagent 以 `tools.approvalMode: yolo` 运行——它没有交互 UI，无法�
 - **`omp models refresh` 会重建缓存**：离线环境先备份 `~/.omp/models.db` 或别刷新。
 - **版本漂移**：命令、默认值和小节编号都可能变；脚本里锁 `--ref v<version>`，升级后跑一次 smoke。
 
-## E.16 练习
+## 14.16 练习
 
 1. 用 `omp setup` 配两个 provider，设 `default` 与 `smol` 两个角色，用 `Ctrl+P` 在会话中切换，观察同一任务的质量/成本差异。
 2. 在 `.omp/commands/review.md` 写一个 `/review` 模板，要求按 P0/P1/P2 输出并带文件行号；用 `$ARGUMENTS` 传入关注点。
@@ -1381,4 +1381,4 @@ subagent 以 `tools.approvalMode: yolo` 运行——它没有交互 UI，无法�
 
 ---
 
-下一站：回到第 17 章看三家工具的横向对比；omp 可以当成「Pi 的加强档」放进同一张决策矩阵。
+下一站：第 15 章介绍 Claude Code；第 18 章是三家工具的横向对比，omp 可以当成「Pi 的加强档」放进同一张决策矩阵。

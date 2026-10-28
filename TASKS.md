@@ -14,7 +14,7 @@
 - [x] T06 静态检查 `build/check.mjs`（编号 / 表格 / 锚点 / 围栏 / 笔误 / 链接）
 - [x] T07 根 `package.json`（build / check / verify / test:examples）
 
-## 阶段二：正文章节（17 章）
+## 阶段二：正文章节（18 章）
 
 - [x] T10 `book/00-preface.md` 前言：为什么现在、读者、三条心态
 - [x] T11 `book/01-landscape.md` 从补全到 agent：agent loop、token 预算、三家架构
@@ -30,10 +30,11 @@
 - [x] T21 `book/11-workflows.md` 五大实战工作流
 - [x] T22 `book/12-multi-agent.md` 多 agent、并行与云端
 - [x] T23 `book/13-pi.md` 工具专章：Pi（生态、配置、扩展全景、边界）
-- [x] T24 `book/14-claude-code.md` 工具专章：Claude Code（权限、checkpoint、后台/云）
-- [x] T25 `book/15-codex.md` 工具专章：Codex（沙箱、审批、exec 流水线、多 agent）
-- [x] T26 `book/16-internals.md` 内部原理：60 行迷你 agent、会话格式、压缩算法、RPC
-- [x] T27 `book/17-migration.md` 横向对比、选型与迁移
+- [x] T38 `book/14-omp.md` omp 实战手册（安装、CLI、TUI、斜杠命令、工具面、子 agent、扩展、自动化与安全）
+- [x] T24 `book/15-claude-code.md` 工具专章：Claude Code（权限、checkpoint、后台/云）
+- [x] T25 `book/16-codex.md` 工具专章：Codex（沙箱、审批、exec 流水线、多 agent）
+- [x] T26 `book/17-internals.md` 内部原理：60 行迷你 agent、会话格式、压缩算法、RPC
+- [x] T27 `book/18-migration.md` 横向对比、选型与迁移
 
 ## 阶段三：附录与配套代码
 
@@ -45,7 +46,6 @@
 - [x] T35 `examples/pi-extensions` 可加载扩展 + tsconfig + 类型检查通过
 - [x] T36 `examples/skills`、`examples/prompts`、`examples/mcp`、`examples/ci`
 - [x] T37 `examples/ci/pi-stream.mjs`、`parallel-worktrees.sh`、`github-actions.yml`
-- [x] T38 `appendix/e-omp.md` omp 实战手册（安装、CLI、TUI、斜杠命令、工具面、子 agent、扩展、自动化与安全）
 - [x] T39 GitHub Pages 自动部署（push 到 `main` 构建 `dist/` 并发布）
 
 ## 阶段四：构建与校验
@@ -67,18 +67,19 @@
 
 | 项 | 结果 |
 |---|---|
-| 文件数 | 24（README + 17 章 + 5 附录 + 1 规范） |
-| 正文字数 | 55,776 词/字（构建统计，含代码与符号） |
+| 文件数 | 24（README + 前言 + 18 章 + 4 附录） |
+| 正文字数 | 55,704 词/字（构建统计，含代码与符号） |
 | 表格 | 136 |
 | Mermaid 图 | 32 |
 | 代码块 | 253 |
-| PDF | 未重跑（新增附录 E 后需重新导出） |
+| PDF | 未重跑（omp 调整为第 14 章后需重新导出） |
 | 链接校验 | 通过 |
 | 在线阅读 | <https://fxjs.github.io/ai-coding-agents-book/> |
 | 编号校验 | 通过 |
 | `examples/task-cli` | 8 tests passed |
 | `examples/pi-extensions` | `tsc -p tsconfig.json` 无错误 |
-| 构建产物 | `dist/index.html`（约 445 KB）、`dist/book.md` |
+| 构建产物 | `dist/index.html`（446,174 字节）、`dist/book.md` |
+| 章节调整 | omp 从附录 E 移为 Pi 后的第 14 章，后续章节顺延至第 18 章；构建、链接与编号校验通过，浏览器目录跳转已核对 |
 
 ## 约定
 
